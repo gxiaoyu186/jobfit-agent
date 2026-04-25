@@ -83,5 +83,7 @@ python app.py
 生成学习建议 + 报告
 ```
 ## 项目主页
-[img/登录.jpg](https://github.com/gxiaoyu186/jobfit-agent/blob/master/img/%E4%B8%BB%E9%A1%B5.jpg)
-[img/主页.jpg](https://github.com/gxiaoyu186/jobfit-agent/blob/master/img/%E7%99%BB%E5%BD%95.jpg?raw=true)
+<img width="1848" height="876" alt="登录" src="https://github.com/user-attachments/assets/9a6c2f3c-38aa-45b5-80b4-7062fcb068c6" />
+<img width="1874" height="869" alt="主页" src="https://github.com/user-attachments/assets/d0bf36a4-f6eb-443d-8f74-de7764ae55cb" />
+
+
