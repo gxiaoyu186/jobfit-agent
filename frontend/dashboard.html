@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobFit Agent - 智能求职匹配</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .logo-icon {
+            font-size: 1.8rem;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        }
+
+        .header .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header .user-info .greeting {
+            font-size: 0.9rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .header .user-info .username {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .header .btn-logout {
+            background: #f5f5f5;
+            color: #666;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .header .btn-logout:hover {
+            background: #e74c3c;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .chat-container {
+            flex: 1;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        .chat-header {
+            padding: 15px 25px;
+            border-bottom: 1px solid #e8e8e8;
+            background: #fafafa;
+        }
+
+        .chat-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px 25px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .message {
+            display: flex;
+            gap: 15px;
+            max-width: 75%;
+            animation: messageIn 0.3s ease-out;
+        }
+
+        @keyframes messageIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.agent {
+            align-self: flex-start;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.agent .avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.user .avatar {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+        }
+
+        .message .content {
+            flex: 1;
+            padding: 14px 20px;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .message.agent .content {
+            background: #f0f0ff;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .content {
+            background: #e6f7ff;
+            color: #333;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message .time {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .message .tool-status {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 4px;
+            padding: 4px 8px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .chat-input-area {
+            border-top: 1px solid #e8e8e8;
+            padding: 15px 20px 20px;
+            background: #fafafa;
+        }
+
+        .upload-section {
+            margin-bottom: 12px;
+        }
+
+        .upload-section h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .upload-row {
+            display: flex;
+            gap: 12px;
+        }
+
+        .upload-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px dashed #d0d0d0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-btn:hover {
+            border-color: #667eea;
+            background: #f8f5ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-btn.active {
+            border-color: #28a745;
+            border-style: solid;
+            background: #f0fff4;
+        }
+
+        .upload-btn input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .upload-btn .icon {
+            font-size: 1.4rem;
+            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+            flex-shrink: 0;
+        }
+
+        .upload-btn .info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .upload-btn .text {
+            font-size: 0.8rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .upload-btn .filename {
+            font-size: 0.75rem;
+            color: #28a745;
+            max-width: 150px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            margin-top: 12px;
+        }
+
+        .input-area {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 20px;
+            padding: 12px 20px;
+            transition: border-color 0.3s;
+            min-height: 48px;
+        }
+
+        .input-area:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .input-area textarea {
+            width: 100%;
+            border: none;
+            resize: none;
+            min-height: 24px;
+            max-height: 80px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            line-height: 1.4;
+            background: transparent;
+            outline: none;
+        }
+
+        .control-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn.play-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .control-btn.play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn.play-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .control-btn.stop-btn {
+            background: #e74c3c;
+            color: white;
+            display: none;
+        }
+
+        .control-btn.stop-btn.active {
+            display: flex;
+        }
+
+        .control-btn.stop-btn:hover {
+            background: #c0392b;
+            transform: scale(1.1);
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #28a745;
+        }
+
+        .status-indicator.processing {
+            background: #f39c12;
+            animation: pulse 1s infinite;
+        }
+
+        .status-indicator.error {
+            background: #e74c3c;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .loading-dots {
+            display: inline-flex;
+            gap: 4px;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #667eea;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            pointer-events: auto;
+            animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        .toast.toast-out {
+            animation: toastOut 0.3s ease-in forwards;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+        }
+
+        @keyframes toastOut {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%) scale(0.95);
+            }
+        }
+
+        .toast-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            background: #f8d7da;
+            color: #e74c3c;
+        }
+
+        .toast.warning .toast-icon {
+            background: #fff3cd;
+            color: #f39c12;
+        }
+
+        .toast.info .toast-icon {
+            background: #d1ecf1;
+            color: #3498db;
+        }
+
+        .toast-message {
+            flex: 1;
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-text {
+            margin-top: 20px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .main-container {
+                padding: 20px;
+            }
+
+            .chat-messages {
+                padding: 20px;
+            }
+
+            .message {
+                max-width: 85%;
+            }
+
+            .upload-row {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .header .logo h1 {
+                font-size: 1.4rem;
+            }
+
+            .main-container {
+                padding: 15px;
+            }
+
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .message .avatar {
+                width: 40px;
+                height: 40px;
+            }
+
+            .message .content {
+                padding: 14px 18px;
+                font-size: 0.9rem;
+            }
+
+            .chat-input-area {
+                padding: 15px 20px 20px;
+            }
+
+            .input-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .control-btns {
+                align-self: flex-end;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loadingText">处理中...</div>
+    </div>
+
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">🤖</div>
+            <h1>JobFit Agent</h1>
+        </div>
+        <div class="user-info">
+            <span class="greeting">欢迎，<span class="username" id="welcomeText">用户</span></span>
+            <a href="index.html" class="btn-logout" onclick="localStorage.removeItem('token'); localStorage.removeItem('username'); showToast('退出成功', 'success');">退出</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <h2 class="section-title">智能求职助手</h2>
+        
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>与 JobFit Agent 对话</h2>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <div class="message agent">
+                    <div class="avatar">J</div>
+                    <div class="content">
+                        您好！我是 JobFit Agent，您的智能求职助手。
+                        <br><br>
+                        请上传您的简历和目标岗位的 JD，我将帮您分析匹配度并提供个性化建议。
+                        <div class="time">现在</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <div class="upload-section">
+                    <h3>文件上传</h3>
+                    <div class="upload-row">
+                        <div class="upload-btn" id="resumeUpload">
+                            <div class="icon">💼</div>
+                            <div class="info">
+                                <div class="text">上传简历</div>
+                                <div class="filename" id="resumeFilename"></div>
+                            </div>
+                            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('resume', this)">
+                        </div>
+                        <div class="upload-btn" id="jdUpload">
+                            <div class="icon">📄</div>
+                            <div class="info">
+                                <div class="text">上传岗位 JD</div>
+                                <div class="filename" id="jdFilename"></div>
+                            </div>
+                            <input type="file" id="jdFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('jd', this)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-row">
+                    <div class="input-area">
+                        <textarea id="messageInput" placeholder="输入您的问题..." oninput="autoResize(this)"></textarea>
+                    </div>
+                    <div class="control-btns">
+                        <button class="control-btn play-btn" id="playBtn" onclick="sendMessage()" title="发送">
+                            ▶
+                        </button>
+                        <button class="control-btn stop-btn" id="stopBtn" onclick="stopGeneration()" title="停止">
+                            ■
+                        </button>
+                    </div>
+                </div>
+
+                <div class="status-bar">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText">就绪</span>
+                    <div class="loading-dots" id="loadingDots" style="display: none;">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resumeFile = null;
+        let jdFile = null;
+        let resumePath = '';
+        let jdPath = '';
+        let isProcessing = false;
+        let currentController = null;
+
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            const icons = { success: '✓', error: '✕', warning: '!', info: 'i' };
+            toast.innerHTML = `
+                <div class="toast-icon">${icons[type]}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('toast-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function showLoading(text = '处理中...') {
+            const overlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+            loadingText.textContent = text;
+            overlay.classList.add('active');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('active');
+        }
+
+        async function handleFileUpload(type, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['.pdf', '.doc', '.docx', '.jpg', '.jpeg', '.png'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+            if (!allowedTypes.includes(fileExt)) {
+                showToast('不支持的文件格式，请上传 PDF、Word 或图片文件', 'error');
+                input.value = '';
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('文件大小不能超过 10MB', 'warning');
+                input.value = '';
+                return;
+            }
+
+            const username = localStorage.getItem('username') || 'anonymous';
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('username', username);
+
+            try {
+                const response = await fetch(`/api/upload/${type}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (type === 'resume') {
+                        resumeFile = file;
+                        resumePath = data.path;
+                        document.getElementById('resumeFilename').textContent = file.name;
+                        document.getElementById('resumeUpload').classList.add('active');
+                        showToast('简历上传成功', 'success');
+                    } else {
+                        jdFile = file;
+                        jdPath = data.path;
+                        document.getElementById('jdFilename').textContent = file.name;
+                        document.getElementById('jdUpload').classList.add('active');
+                        showToast('岗位 JD 上传成功', 'success');
+                    }
+                } else {
+                    showToast(data.error || '上传失败', 'error');
+                    input.value = '';
+                }
+            } catch (err) {
+                showToast('上传失败，请稍后重试', 'error');
+                input.value = '';
+            }
+        }
+
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function addMessage(type, content) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar';
+            avatar.textContent = type === 'agent' ? 'J' : 'U';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'content';
+            contentDiv.innerHTML = `${content}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            return contentDiv;
+        }
+
+        function updateStatus(status, text) {
+            const indicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const loadingDots = document.getElementById('loadingDots');
+            const playBtn = document.getElementById('playBtn');
+            const stopBtn = document.getElementById('stopBtn');
+
+            indicator.className = 'status-indicator';
+
+            if (status === 'processing') {
+                indicator.classList.add('processing');
+                statusText.textContent = text || '处理中';
+                loadingDots.style.display = 'inline-flex';
+                playBtn.disabled = true;
+                stopBtn.classList.add('active');
+            } else if (status === 'error') {
+                indicator.classList.add('error');
+                statusText.textContent = text || '错误';
+                loadingDots.style.display = 'none';
+                playBtn.disabled = false;
+                stopBtn.classList.remove('active');
+            } else {
+                statusText.textContent = text || '就绪';
+                loadingDots.style.display = 'none';
+                playBtn.disabled = false;
+                stopBtn.classList.remove('active');
+            }
+        }
+
+        function stopGeneration() {
+            if (currentController) {
+                currentController.abort();
+                currentController = null;
+            }
+            isProcessing = false;
+            updateStatus('idle', '已停止');
+            showToast('已停止生成', 'info');
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+
+            if (!message && !(resumeFile && jdFile)) {
+                showToast('请输入问题或上传文件', 'warning');
+                return;
+            }
+
+            if (message) {
+                addMessage('user', message);
+            } else if (resumeFile && jdFile) {
+                addMessage('user', '已上传简历和 JD，请分析匹配度。');
+            }
+
+            const userMessage = message || '请分析简历和 JD 的匹配度';
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            processMessage(userMessage);
+        }
+
+        function formatContent(text) {
+            if (!text) return '';
+            return text
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/\n/g, '<br>');
+        }
+
+        async function processMessage(message) {
+            isProcessing = true;
+            updateStatus('processing', '正在思考...');
+
+            let responseText = '';
+            let toolStatus = '';
+            const messageEl = addMessage('agent', '正在思考，请稍候...');
+
+            try {
+                const response = await fetch('/api/agent/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        resume_path: resumePath,
+                        jd_path: jdPath
+                    })
+                });
+
+                if (!response.ok) {
+                    const data = await response.json();
+                    responseText = `抱歉，发生了错误：${data.error || '未知错误'}。请稍后重试。`;
+                    messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                    isProcessing = false;
+                    updateStatus('idle', '就绪');
+                    return;
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+
+                    const chunk = decoder.decode(value);
+                    const lines = chunk.split('\n');
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                if (data.type === 'agent') {
+                                    responseText = data.content; // 替换为完整内容
+                                    messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                                } else if (data.type === 'tool') {
+                                    // 显示工具调用的实际内容
+                                    messageEl.innerHTML = `${formatContent(data.content)}<div class="tool-status">[ 工具调用中... ]</div><div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                                } else if (data.type === 'done') {
+                                    break;
+                                } else if (data.type === 'error') {
+                                    responseText = `抱歉，发生了错误：${data.content}。请稍后重试。`;
+                                    messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                                }
+                            } catch (e) {
+                                console.error('Parse error:', e);
+                            }
+                        }
+                    }
+
+                    document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+                }
+            } catch (err) {
+                responseText = `网络错误，请检查服务器是否运行。请稍后重试。`;
+                messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+            }
+
+            isProcessing = false;
+            updateStatus('idle', '就绪');
+            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (!isProcessing) {
+                    sendMessage();
+                }
+            }
+        });
+
+        const token = localStorage.getItem('token');
+        const storedUsername = localStorage.getItem('username');
+        if (!token) {
+            window.location.href = 'index.html';
+        }
+        if (storedUsername) {
+            document.getElementById('welcomeText').textContent = storedUsername;
+        }
+    </script>
+</body>
+</html>
