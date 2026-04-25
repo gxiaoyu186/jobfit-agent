@@ -82,3 +82,6 @@ python app.py
        ↓
 生成学习建议 + 报告
 ```
+## 项目主页
+img/登录.jpg
+img/主页.jpg
