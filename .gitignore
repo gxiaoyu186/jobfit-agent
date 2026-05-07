@@ -32,5 +32,4 @@ Thumbs.db
 uploads/
 *.db-shm
 *.db-wal
-frontend/
 database/

@@ -245,7 +245,7 @@
         }
 
         .upload-section {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .upload-section h3 {
@@ -700,7 +700,7 @@
 
             <div class="chat-input-area">
                 <div class="upload-section">
-                    <h3>文件上传</h3>
+                    <h3>📷 文件上传</h3>
                     <div class="upload-row">
                         <div class="upload-btn" id="resumeUpload">
                             <div class="icon">💼</div>
@@ -723,7 +723,7 @@
 
                 <div class="input-row">
                     <div class="input-area">
-                        <textarea id="messageInput" placeholder="输入您的问题..." oninput="autoResize(this)"></textarea>
+                        <textarea id="messageInput" placeholder="输入您的问题或直接粘贴简历和JD文字内容进行分析..." oninput="autoResize(this)"></textarea>
                     </div>
                     <div class="control-btns">
                         <button class="control-btn play-btn" id="playBtn" onclick="sendMessage()" title="发送">
@@ -807,7 +807,7 @@
             formData.append('username', username);
 
             try {
-                const response = await fetch(`/api/upload/${type}`, {
+                const response = await fetch(`/api/v1/upload/${type}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -907,15 +907,18 @@
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
 
-            if (!message && !(resumeFile && jdFile)) {
-                showToast('请输入问题或上传文件', 'warning');
+            // 验证输入：至少需要上传图片，或输入文字内容
+            const hasImageInput = resumeFile && jdFile;
+            
+            if (!message && !hasImageInput) {
+                showToast('请上传简历和JD图片，或在输入框中输入内容', 'warning');
                 return;
             }
 
             if (message) {
                 addMessage('user', message);
-            } else if (resumeFile && jdFile) {
-                addMessage('user', '已上传简历和 JD，请分析匹配度。');
+            } else if (hasImageInput) {
+                addMessage('user', '请分析简历和 JD 的匹配度。');
             }
 
             const userMessage = message || '请分析简历和 JD 的匹配度';
@@ -925,13 +928,32 @@
             processMessage(userMessage);
         }
 
+        function sanitizeContent(text) {
+            // 移除潜在危险的 HTML 标签
+            return text
+                .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')      // 移除 script 标签
+                .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')    // 移除 iframe 标签
+                .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')          // 移除 svg 标签
+                .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '')    // 移除 object 标签
+                .replace(/<embed[^>]*>[\s\S]*?<\/embed>/gi, '')      // 移除 embed 标签
+                .replace(/<applet[^>]*>[\s\S]*?<\/applet>/gi, '')    // 移除 applet 标签
+                .replace(/javascript:/gi, 'javascript:')             // 保持但标记
+                .replace(/on\w+\s*=\s*["']?[^"']*["']?/gi, '');      // 移除事件属性
+        }
+        
         function formatContent(text) {
             if (!text) return '';
-            return text
+            
+            // 首先进行安全清理
+            let sanitized = sanitizeContent(text);
+            
+            // 然后进行 Markdown 转换
+            return sanitized
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 .replace(/^- (.+)$/gm, '<li>$1</li>')
-                .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+                .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+                .replace(/<\/ul>\s*<ul>/g, '')  // 合并相邻的 ul 标签
                 .replace(/\n/g, '<br>');
         }
 
@@ -944,14 +966,17 @@
             const messageEl = addMessage('agent', '正在思考，请稍候...');
 
             try {
-                const response = await fetch('/api/agent/chat', {
+                // 构建请求体：消息 + 图片路径（如果有）
+                const requestBody = {
+                    message: message,
+                    resume_path: resumePath,
+                    jd_path: jdPath
+                };
+                
+                const response = await fetch('/api/v1/agent/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        message: message,
-                        resume_path: resumePath,
-                        jd_path: jdPath
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 if (!response.ok) {

@@ -1,22 +1,43 @@
+"""
+JobFit Agent 核心模块 - 定义 Agent 工作流和工具调用
+特性：
+1. 使用 LangGraph 构建 Agent
+2. 支持工具调用和状态管理
+3. 与服务层解耦
+4. 支持流式响应
+"""
+
+import sqlite3
+import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain.agents import create_agent
-import sqlite3
-import os
-from tool import *
+
+from config.settings import settings
+from agent.tools.ocr_tool import extract_text_from_image
+from agent.tools.match_tool import match_resume_to_jd
+from agent.tools.search_tool import search_internet
+from agent.tools.learning_tool import suggest_learning
+from agent.tools.reflection_tool import reflect_on_match
+from agent.tools.report_tool import generate_report
 
 load_dotenv()
 
-
 def create_jobfit_agent():
+    """
+    创建 JobFit Agent 实例
+    
+    Returns:
+        Agent 实例
+    """
     # 初始化多模态模型（用于决策和工具调用）
     model = init_chat_model(
-        model="qwen3.5-plus",
+        model=settings.MODEL_NAME,
         model_provider="openai",
-        base_url=os.getenv("BASE_URL"),
-        api_key=os.getenv("API_KEY")
+        base_url=settings.BASE_URL,
+        api_key=settings.API_KEY
     )
 
     # 工具列表
@@ -45,15 +66,15 @@ def create_jobfit_agent():
     1. **必须**连续两次调用 `extract_text_from_image`，分别提取简历和 JD 的文字。
     2. **必须**调用 `match_resume_to_jd`，传入上一步得到的文本。
     3. **必须**调用 `reflect_on_match`，传入匹配结果 JSON。
-       - 如果反思结果中包含“需要搜索”，则必须调用 `search_internet`（用缺失技能作为关键词）。
+       - 如果反思结果中包含"需要搜索"，则必须调用 `search_internet`（用缺失技能作为关键词）。
     4. **必须**将匹配分数、匹配/缺失技能、反思结论、搜索摘要（如有）组织成最终回复。
-    5. 如果用户要求“生成报告”，**必须**调用 `generate_report`。
+    5. 如果用户要求"生成报告"，**必须**调用 `generate_report`。
 
     ## 其他规则
-    - **替换/更新**：用户明确说“替换简历/JD”时，只使用最新提交的图片或文本，忽略之前的内容。
+    - **替换/更新**：用户明确说"替换简历/JD"时，只使用最新提交的图片或文本，忽略之前的内容。
     - **主动追问**：在首次匹配回复后，可以主动询问一项额外信息（如项目经验、求职时限），但每次最多追问一次。
     - **单张图片**：如果只提供一张图片，询问另一张。
-    - **禁止编造**：绝对不能在不调用工具的情况下回复“无法提取”或类似的错误提示。工具返回的错误应原样告知用户。
+    - **禁止编造**：绝对不能在不调用工具的情况下回复"无法提取"或类似的错误提示。工具返回的错误应原样告知用户。
 
     ## 示例用户输入
     > 分析匹配度。简历路径：/a/resume.png，JD路径：/b/jd.png
@@ -62,7 +83,9 @@ def create_jobfit_agent():
     """
 
     # 检查点持久化
-    conn = sqlite3.connect("resources/jobfit_agent.db", check_same_thread=False)
+    os.makedirs(settings.RESOURCES_DIR, exist_ok=True)
+    db_path = os.path.join(settings.RESOURCES_DIR, "jobfit_agent.db")
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     checkpointer = SqliteSaver(conn)
     checkpointer.setup()
 
@@ -76,30 +99,48 @@ def create_jobfit_agent():
 
 
 def stream_jobfit_agent(agent, user_input, config):
+    """
+    流式调用 Agent
+    
+    Args:
+        agent: Agent 实例
+        user_input: 用户输入
+        config: 配置参数
+        
+    Yields:
+        响应数据块
+    """
     import time
     print(f"[{time.strftime('%H:%M:%S')}] 开始stream...")
+    
     for chunk in agent.stream({"messages": [HumanMessage(content=user_input)]}, config):
         print(f"[{time.strftime('%H:%M:%S')}] 收到chunk，keys: {chunk.keys() if hasattr(chunk, 'keys') else type(chunk)}")
+        
         if "agent" in chunk:
             for msg in chunk["agent"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
                     print(f"[{time.strftime('%H:%M:%S')}] yield agent: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
+                    
         elif "tools" in chunk:
             for msg in chunk["tools"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
                     print(f"[{time.strftime('%H:%M:%S')}] yield tool: {str(msg.content)[:100]}...")
                     yield {"type": "tool", "content": msg.content}
+                    
         elif "model" in chunk:
             for msg in chunk["model"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
                     print(f"[{time.strftime('%H:%M:%S')}] yield model: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
+                    
         elif "__end__" in chunk:
             for msg in chunk["__end__"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
                     print(f"[{time.strftime('%H:%M:%S')}] yield end agent: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
+                    
         else:
             print(f"[{time.strftime('%H:%M:%S')}] 未处理的chunk结构: {str(chunk)[:200]}")
+            
     print(f"[{time.strftime('%H:%M:%S')}] stream结束")
