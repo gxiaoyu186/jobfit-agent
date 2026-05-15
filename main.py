@@ -1,4 +1,3 @@
-import sys
 from agent import create_jobfit_agent
 from langchain.messages import HumanMessage
 

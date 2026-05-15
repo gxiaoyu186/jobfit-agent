@@ -36,6 +36,19 @@ def generate_report(match_json_str: str, additional_advice: str = "") -> str:
     report_path = os.path.join(settings.REPORTS_DIR, f"jobfit_report_{timestamp}.md")
 
     # 生成报告内容
+    recommendations = data.get('recommendations', [])
+    if isinstance(recommendations, list):
+        recommendations = [rec.strip() for rec in recommendations if rec.strip()]
+        # 清理建议中可能存在的 Markdown 标题符号
+        recommendations = [rec.lstrip('#').strip() for rec in recommendations]
+    else:
+        recommendations = []
+    
+    # 清理补充建议中的 Markdown 标题符号
+    additional_advice_clean = additional_advice.strip() if additional_advice else '无'
+    if additional_advice_clean and additional_advice_clean != '无':
+        additional_advice_clean = additional_advice_clean.lstrip('#').strip()
+    
     content = f"""# JobFit 职业匹配分析报告
 
 生成时间：{datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
@@ -51,10 +64,10 @@ def generate_report(match_json_str: str, additional_advice: str = "") -> str:
 - ❌ 缺失：{', '.join(data.get('preferred_skills_missing', [])) or '无'}
 
 ## 学习建议
-{chr(10).join(f'- {rec}' for rec in data.get('recommendations', []))}
+{chr(10).join(f'- {rec}' for rec in recommendations) if recommendations else '无'}
 
 ## 补充建议
-{additional_advice if additional_advice else '无'}
+{additional_advice_clean}
 """
     
     # 保存报告

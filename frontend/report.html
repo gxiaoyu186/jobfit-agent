@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobFit Agent - 报告详情</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+
+        /* 头部导航 */
+        .header {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .logo-icon {
+            font-size: 1.5rem;
+        }
+
+        .header .logo-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header .nav-btns {
+            display: flex;
+            gap: 12px;
+        }
+
+        .header .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .btn-back {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .header .btn-back:hover {
+            background: #e8e8e8;
+        }
+
+        .header .btn-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .header .btn-download:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        /* 报告卡片 */
+        .report-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+        }
+
+        .report-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .report-meta {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .report-body {
+            padding: 30px;
+        }
+
+        /* Markdown 样式 */
+        .markdown-content {
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .markdown-content h1 {
+            font-size: 1.4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .markdown-content h2 {
+            font-size: 1.2rem;
+            color: #333;
+            margin: 25px 0 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .markdown-content h2::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .markdown-content p {
+            margin-bottom: 15px;
+        }
+
+        .markdown-content ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+
+        .markdown-content li {
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .markdown-content li::marker {
+            color: #667eea;
+        }
+
+        .markdown-content strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .markdown-content em {
+            color: #888;
+        }
+
+        /* 匹配分数卡片 */
+        .score-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .score-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .score-out-of {
+            font-size: 1.2rem;
+            color: #999;
+        }
+
+        /* 技能匹配区域 */
+        .skills-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .skill-box {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .skill-box h3 {
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .skill-box.matched {
+            border-left: 4px solid #28a745;
+        }
+
+        .skill-box.missing {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .skill-tag {
+            padding: 6px 12px;
+            background: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: #666;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .skill-tag.matched {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .skill-tag.missing {
+            background: #f8d7da;
+            color: #e74c3c;
+        }
+
+        /* 加载状态 */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        /* Toast 提示 */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast.error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .toast-icon {
+            font-size: 1.2rem;
+        }
+
+        .toast-message {
+            font-size: 0.95rem;
+            color: #333;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                padding: 12px 20px;
+            }
+
+            .header .btn {
+                padding: 8px 14px;
+                font-size: 0.8rem;
+            }
+
+            .report-body {
+                padding: 20px;
+            }
+
+            .skills-section {
+                grid-template-columns: 1fr;
+            }
+
+            .score-value {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 头部导航 -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">🤖</div>
+            <div class="logo-title">JobFit Agent</div>
+        </div>
+        <div class="nav-btns">
+            <button class="btn btn-back" onclick="goBack()">
+                ← 返回主页
+            </button>
+            <button class="btn btn-download" onclick="downloadPDF()">
+                📥 下载PDF
+            </button>
+            <button class="btn btn-download" onclick="downloadMD()">
+                📄 下载MD
+            </button>
+        </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <div id="contentContainer">
+            <div class="loading-container">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在加载报告...</div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let reportData = null;
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon">${type === 'success' ? '✓' : '✕'}</div>
+                <div class="toast-message">${message}</div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        function goBack() {
+            window.close();
+        }
+
+        async function downloadPDF() {
+            if (!reportData) {
+                showToast('报告数据未加载', 'error');
+                return;
+            }
+
+            try {
+                showToast('正在生成PDF...', 'success');
+                
+                const reportCard = document.querySelector('.report-card');
+                if (!reportCard) {
+                    throw new Error('未找到报告内容');
+                }
+                
+                const canvas = await html2canvas(reportCard, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    logging: false
+                });
+                
+                const imgData = canvas.toDataURL('image/png');
+                const { jsPDF } = window.jspdf;
+                
+                const imgWidth = canvas.width;
+                const imgHeight = canvas.height;
+                const pdfWidth = 210; // A4宽度（mm）
+                const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+                
+                // 创建PDF
+                const doc = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
+                doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                
+                const filename = `JobFit报告_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.pdf`;
+                doc.save(filename);
+                
+                showToast('PDF下载成功！', 'success');
+            } catch (error) {
+                showToast('PDF生成失败，请稍后重试', 'error');
+            }
+        }
+
+        function downloadMD() {
+            if (!reportData) {
+                showToast('报告数据未加载', 'error');
+                return;
+            }
+
+            try {
+                // 生成MD格式内容
+                let mdContent = `# JobFit 职业匹配分析报告\n\n`;
+                mdContent += `生成时间：${new Date().toLocaleString('zh-CN')}\n\n`;
+                mdContent += `## 综合匹配分数：${reportData.match_score || 'N/A'} / 100\n\n`;
+                
+                // 必需技能
+                mdContent += `## 必需技能匹配情况\n`;
+                mdContent += `- ✅ 已匹配：${(reportData.required_skills_match || []).join(', ') || '无'}\n`;
+                mdContent += `- ❌ 缺失：${(reportData.required_skills_missing || []).join(', ') || '无'}\n\n`;
+                
+                // 加分技能
+                mdContent += `## 加分技能情况\n`;
+                mdContent += `- ✅ 已匹配：${(reportData.preferred_skills_match || []).join(', ') || '无'}\n`;
+                mdContent += `- ❌ 缺失：${(reportData.preferred_skills_missing || []).join(', ') || '无'}\n\n`;
+                
+                // 学习建议
+                mdContent += `## 学习建议\n`;
+                const recommendations = reportData.recommendations || [];
+                if (recommendations.length > 0) {
+                    recommendations.forEach((rec, index) => {
+                        mdContent += `${index + 1}. ${rec}\n`;
+                    });
+                } else {
+                    mdContent += `暂无学习建议\n`;
+                }
+
+                // 下载文件
+                const blob = new Blob([mdContent], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `JobFit_报告_${new Date().toISOString().slice(0, 10)}.md`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('MD下载成功', 'success');
+            } catch (err) {
+                console.error('MD生成失败:', err);
+                showToast('MD生成失败', 'error');
+            }
+        }
+
+        async function loadReport() {
+            const params = new URLSearchParams(window.location.search);
+            const username = params.get('username') || 'anonymous';
+            const filename = params.get('filename');
+            
+            if (!filename) {
+                document.getElementById('contentContainer').innerHTML = `
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h1>错误</h1>
+                        </div>
+                        <div class="report-body">
+                            <p style="color: #e74c3c; text-align: center; padding: 40px;">报告文件名参数缺失</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const apiUrl = `/api/v1/report/content?username=${encodeURIComponent(username)}&filename=${encodeURIComponent(filename)}`;
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`报告获取失败 (${response.status})`);
+                }
+
+                const data = await response.json();
+                
+                try {
+                    const jsonMatch = data.content.match(/\{[\s\S]*\}/);
+                    if (jsonMatch) {
+                        reportData = JSON.parse(jsonMatch[0]);
+                    }
+                } catch (e) {
+                }
+
+                renderReport(data.content, filename);
+            } catch (err) {
+                document.getElementById('contentContainer').innerHTML = `
+                    <div class="report-card">
+                        <div class="report-header">
+                            <h1>错误</h1>
+                        </div>
+                        <div class="report-body">
+                            <p style="color: #e74c3c; text-align: center; padding: 40px;">无法加载报告，请稍后重试</p>
+                            <p style="text-align: center; color: #666; font-size: 12px; padding-top: 10px;">错误信息: ${err.message}</p>
+                            <p style="text-align: center; color: #999; font-size: 11px; padding-top: 5px;">请按 F12 打开控制台查看详细日志</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 从Markdown内容中解析报告数据
+        function parseReportFromMarkdown(content) {
+            const result = {
+                match_score: null,
+                required_skills_match: [],
+                required_skills_missing: [],
+                preferred_skills_match: [],
+                preferred_skills_missing: [],
+                recommendations: [],
+                content: content
+            };
+            
+            // 提取匹配分数
+            const scoreMatch = content.match(/## 综合匹配分数：(\d+) \/ 100/);
+            if (scoreMatch) {
+                result.match_score = parseInt(scoreMatch[1]);
+            }
+            
+            // 提取必需技能 - 已匹配
+            const requiredMatchSection = content.match(/## 必需技能匹配情况[\s\S]*?(?=\n##|\Z)/);
+            if (requiredMatchSection) {
+                const matchedSkills = requiredMatchSection[0].match(/✅ 已匹配：(.+)/);
+                if (matchedSkills && matchedSkills[1] && matchedSkills[1] !== '无') {
+                    result.required_skills_match = matchedSkills[1].split(/[,，、]/).map(s => s.trim()).filter(s => s);
+                }
+                
+                const missingSkills = requiredMatchSection[0].match(/❌ 缺失：(.+)/);
+                if (missingSkills && missingSkills[1] && missingSkills[1] !== '无') {
+                    result.required_skills_missing = missingSkills[1].split(/[,，、]/).map(s => s.trim()).filter(s => s);
+                }
+            }
+            
+            // 提取加分技能
+            const preferredSection = content.match(/## 加分技能情况[\s\S]*?(?=\n##|\Z)/);
+            if (preferredSection) {
+                const matchedSkills = preferredSection[0].match(/✅ 已匹配：(.+)/);
+                if (matchedSkills && matchedSkills[1] && matchedSkills[1] !== '无') {
+                    result.preferred_skills_match = matchedSkills[1].split(/[,，、]/).map(s => s.trim()).filter(s => s);
+                }
+                
+                const missingSkills = preferredSection[0].match(/❌ 缺失：(.+)/);
+                if (missingSkills && missingSkills[1] && missingSkills[1] !== '无') {
+                    result.preferred_skills_missing = missingSkills[1].split(/[,，、]/).map(s => s.trim()).filter(s => s);
+                }
+            }
+            
+            // 提取学习建议
+            const recommendationsSection = content.match(/## 学习建议[\s\S]*/);
+            if (recommendationsSection) {
+                const lines = recommendationsSection[0].split('\n').filter(line => line.trim());
+                lines.shift(); // 移除 "## 学习建议" 标题
+                result.recommendations = lines.map(line => {
+                    let cleaned = line.replace(/^[-*•]\s*/, '');
+                    cleaned = cleaned.replace(/^#{1,6}\s*/, '');
+                    cleaned = cleaned.replace(/\*\*(.+?)\*\*/g, '$1');
+                    cleaned = cleaned.replace(/\*(.+?)\*/g, '$1');
+                    return cleaned.trim();
+                }).filter(s => s && s.length > 0);
+            }
+            
+            return result;
+        }
+
+        function renderReport(content, filename) {
+            let matchResult = parseReportFromMarkdown(content);
+            reportData = matchResult;
+
+            const scoreCard = matchResult.match_score ? `
+                <div class="score-card">
+                    <div class="score-value">${matchResult.match_score}</div>
+                    <div class="score-label">综合匹配分数</div>
+                    <div class="score-out-of">/ 100</div>
+                </div>
+            ` : '';
+
+            // 生成技能匹配区域
+            const requiredMatch = matchResult.required_skills_match || [];
+            const requiredMissing = matchResult.required_skills_missing || [];
+            const preferredMatch = matchResult.preferred_skills_match || [];
+            const preferredMissing = matchResult.preferred_skills_missing || [];
+
+            const skillsSection = `
+                <div class="skills-section">
+                    <div class="skill-box matched">
+                        <h3>✅ 必需技能 - 已匹配</h3>
+                        <div class="skill-list">
+                            ${requiredMatch.length > 0 ? requiredMatch.map(s => `<span class="skill-tag matched">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
+                        </div>
+                    </div>
+                    <div class="skill-box missing">
+                        <h3>❌ 必需技能 - 缺失</h3>
+                        <div class="skill-list">
+                            ${requiredMissing.length > 0 ? requiredMissing.map(s => `<span class="skill-tag missing">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
+                        </div>
+                    </div>
+                    <div class="skill-box matched">
+                        <h3>✨ 加分技能 - 已匹配</h3>
+                        <div class="skill-list">
+                            ${preferredMatch.length > 0 ? preferredMatch.map(s => `<span class="skill-tag matched">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
+                        </div>
+                    </div>
+                    <div class="skill-box missing">
+                        <h3>💡 加分技能 - 缺失</h3>
+                        <div class="skill-list">
+                            ${preferredMissing.length > 0 ? preferredMissing.map(s => `<span class="skill-tag missing">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 生成学习建议
+            const recommendations = matchResult.recommendations || [];
+            const recommendationsSection = recommendations.length > 0 ? `
+                <h2>学习建议</h2>
+                <ul>
+                    ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                </ul>
+            ` : '';
+
+            // 获取生成时间
+            const timestampMatch = content.match(/生成时间：(.+)/);
+            const generatedTime = timestampMatch ? timestampMatch[1] : new Date().toLocaleString('zh-CN');
+
+            document.getElementById('contentContainer').innerHTML = `
+                <div class="report-card">
+                    <div class="report-header">
+                        <h1>📊 JobFit 职业匹配分析报告</h1>
+                        <div class="report-meta">生成时间：${generatedTime} | 报告文件：${filename}</div>
+                    </div>
+                    <div class="report-body">
+                        ${scoreCard}
+                        ${skillsSection}
+                        ${recommendationsSection}
+                        <div class="markdown-content">
+                            ${(window.marked || marked).parse(content)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 页面加载时加载报告
+        document.addEventListener('DOMContentLoaded', loadReport);
+    </script>
+</body>
+</html>

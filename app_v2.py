@@ -61,13 +61,17 @@ def create_app():
     def dashboard():
         return send_from_directory('frontend', 'dashboard.html')
     
+    @app.route('/report.html')
+    def report_page():
+        return send_from_directory('frontend', 'report.html')
+    
     return app
 
 if __name__ == '__main__':
     app = create_app()
     
     print('=' * 50)
-    print('JobFit Agent 后端服务 v2.0 已启动')
+    print('JobFit Agent 后端服务 v3.0 已启动')
     print(f'配置检查: {"[OK] 已配置" if settings.is_configured() else "[ERROR] 缺少关键配置"}')
     print('访问地址: http://localhost:5000')
     print('=' * 50)

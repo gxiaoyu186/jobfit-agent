@@ -16,29 +16,35 @@
             height: 100vh;
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             display: flex;
-            flex-direction: column;
             overflow: hidden;
         }
 
-        .header {
+        /* 左侧边栏 */
+        .sidebar {
+            width: 220px;
             background: white;
-            padding: 15px 30px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.08);
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            padding: 20px;
             flex-shrink: 0;
-            border-bottom: 1px solid #e8e8e8;
         }
 
-        .header .logo {
+        .sidebar .logo {
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e8e8e8;
         }
 
-        .header .logo h1 {
-            font-size: 1.5rem;
+        .sidebar .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .sidebar .logo-title {
+            font-size: 1.1rem;
             font-weight: 700;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
@@ -46,81 +52,76 @@
             background-clip: text;
         }
 
-        .header .logo-icon {
-            font-size: 1.8rem;
-            font-family: 'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', sans-serif;
+        .sidebar .user-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
         }
 
-        .header .user-info {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .header .user-info .greeting {
-            font-size: 0.9rem;
-            color: #333;
-            font-weight: 500;
-        }
-
-        .header .user-info .username {
+        .sidebar .user-section .username {
+            font-size: 0.95rem;
             font-weight: 600;
-            color: #667eea;
+            color: #333;
+            margin-bottom: 5px;
         }
 
-        .header .btn-logout {
-            background: #f5f5f5;
-            color: #666;
+        .sidebar .user-section .user-role {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .sidebar .btn {
+            width: 100%;
+            padding: 12px 16px;
             border: none;
-            padding: 8px 18px;
             border-radius: 10px;
             cursor: pointer;
             font-size: 0.85rem;
             font-weight: 500;
             transition: all 0.3s ease;
-            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
-        .header .btn-logout:hover {
+        .sidebar .btn-report {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .sidebar .btn-report:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar .btn-logout {
+            background: #f5f5f5;
+            color: #666;
+            margin-top: auto;
+        }
+
+        .sidebar .btn-logout:hover {
             background: #e74c3c;
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
         }
 
-        .main-container {
+        /* 主内容区域 */
+        .main-content {
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
-            padding: 20px;
-            gap: 15px;
             overflow: hidden;
         }
 
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 2px;
-        }
-
+        /* 对话框区域 */
         .chat-container {
             flex: 1;
             background: white;
+            margin: 20px;
+            margin-bottom: 10px;
             border-radius: 20px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             display: flex;
@@ -133,12 +134,36 @@
             padding: 15px 25px;
             border-bottom: 1px solid #e8e8e8;
             background: #fafafa;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .chat-header h2 {
             font-size: 1.1rem;
             font-weight: 600;
             color: #333;
+            margin: 0;
+        }
+
+        .chat-header .reset-btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #666;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-header .reset-btn:hover {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: #fff5f5;
         }
 
         .chat-messages {
@@ -228,40 +253,42 @@
             text-align: right;
         }
 
-        .message .tool-status {
-            font-size: 0.75rem;
-            color: #666;
-            margin-top: 4px;
-            padding: 4px 8px;
-            background: #f0f0f0;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .chat-input-area {
-            border-top: 1px solid #e8e8e8;
-            padding: 15px 20px 20px;
-            background: #fafafa;
+        /* 输入区域 */
+        .input-container {
+            background: white;
+            margin: 0 20px 20px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 20px;
         }
 
         .upload-section {
             margin-bottom: 15px;
         }
 
-        .upload-section h3 {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
         .upload-row {
             display: flex;
             gap: 12px;
+            justify-content: flex-start;
+            align-items: center;
+        }
+
+        .encouragement {
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            padding: 10px 20px;
+            border-radius: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .upload-btn {
-            flex: 1;
+            width: 300px;
             padding: 12px 16px;
             border: 2px dashed #d0d0d0;
             border-radius: 12px;
@@ -330,7 +357,6 @@
             display: flex;
             gap: 12px;
             align-items: flex-end;
-            margin-top: 12px;
         }
 
         .input-area {
@@ -398,21 +424,6 @@
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
-        }
-
-        .control-btn.stop-btn {
-            background: #e74c3c;
-            color: white;
-            display: none;
-        }
-
-        .control-btn.stop-btn.active {
-            display: flex;
-        }
-
-        .control-btn.stop-btn:hover {
-            background: #c0392b;
-            transform: scale(1.1);
         }
 
         .status-bar {
@@ -545,66 +556,266 @@
             color: #f39c12;
         }
 
-        .toast.info .toast-icon {
-            background: #d1ecf1;
-            color: #3498db;
-        }
-
         .toast-message {
             flex: 1;
             font-size: 0.95rem;
             color: #333;
         }
 
-        .loading-overlay {
+        /* 报告弹窗 */
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            display: flex;
-            flex-direction: column;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
             align-items: center;
             justify-content: center;
-            z-index: 9998;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease;
         }
 
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
+            border: none;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
         }
 
-        .loading-text {
-            margin-top: 20px;
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-content {
+            padding: 20px 25px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .report-item {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .report-item:hover {
+            border-color: #667eea;
+            background: #f8f5ff;
+            transform: translateX(5px);
+        }
+
+        .report-item.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .report-info {
+            flex: 1;
+        }
+
+        .report-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .report-time {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .report-delete-btn {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            color: #ccc;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .report-delete-btn:hover {
+            color: #e74c3c;
+            background-color: #fef2f2;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #888;
+        }
+
+        .empty-state .icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 0.95rem;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #e8e8e8;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .modal-btn.confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .modal-btn.cancel {
+            background: #f5f5f5;
             color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e8e8e8;
+        }
+
+        .modal-btn.confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .modal-btn.cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #e8e8e8;
+        }
+
+        /* 报告预览区域 */
+        .report-preview {
+            background: #fafafa;
+            border-radius: 12px;
+            padding: 20px;
+            white-space: pre-wrap;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            color: #333;
+        }
+
+        .report-preview h1,
+        .report-preview h2 {
+            font-family: inherit;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .report-preview h1 {
+            font-size: 1.4rem;
+        }
+
+        .report-preview h2 {
             font-size: 1.1rem;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .report-preview ul {
+            margin: 10px 0;
+            padding-left: 20px;
         }
 
-        @media (max-width: 1024px) {
-            .main-container {
-                padding: 20px;
+        .report-preview li {
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 180px;
+                padding: 15px;
             }
 
-            .chat-messages {
-                padding: 20px;
+            .sidebar .logo-title {
+                font-size: 0.95rem;
             }
 
             .message {
@@ -613,38 +824,6 @@
 
             .upload-row {
                 flex-direction: column;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header {
-                padding: 15px 20px;
-            }
-
-            .header .logo h1 {
-                font-size: 1.4rem;
-            }
-
-            .main-container {
-                padding: 15px;
-            }
-
-            .chat-messages {
-                padding: 15px;
-            }
-
-            .message .avatar {
-                width: 40px;
-                height: 40px;
-            }
-
-            .message .content {
-                padding: 14px 18px;
-                font-size: 0.9rem;
-            }
-
-            .chat-input-area {
-                padding: 15px 20px 20px;
             }
 
             .input-row {
@@ -662,28 +841,36 @@
 <body>
     <div class="toast-container" id="toastContainer"></div>
 
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">处理中...</div>
-    </div>
-
-    <div class="header">
+    <!-- 左侧边栏 -->
+    <div class="sidebar">
         <div class="logo">
             <div class="logo-icon">🤖</div>
-            <h1>JobFit Agent</h1>
+            <div class="logo-title">JobFit Agent</div>
         </div>
-        <div class="user-info">
-            <span class="greeting">欢迎，<span class="username" id="welcomeText">用户</span></span>
-            <a href="index.html" class="btn-logout" onclick="localStorage.removeItem('token'); localStorage.removeItem('username'); showToast('退出成功', 'success');">退出</a>
+        
+        <div class="user-section">
+            <div class="username" id="welcomeText">用户</div>
+            <div class="user-role">求职者</div>
         </div>
+
+        <button class="btn btn-report" onclick="openReportModal()">
+            📊 生成报告
+        </button>
+
+        <button class="btn btn-logout" onclick="localStorage.removeItem('token'); localStorage.removeItem('username'); showToast('退出成功', 'success'); window.location.href='index.html';">
+            🚪 退出登录
+        </button>
     </div>
 
-    <div class="main-container">
-        <h2 class="section-title">智能求职助手</h2>
-        
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 对话框区域 -->
         <div class="chat-container">
             <div class="chat-header">
                 <h2>与 JobFit Agent 对话</h2>
+                <button class="reset-btn" onclick="showResetConfirm()">
+                    🔄 重新匹配
+                </button>
             </div>
             
             <div class="chat-messages" id="chatMessages">
@@ -697,51 +884,109 @@
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="chat-input-area">
-                <div class="upload-section">
-                    <h3>📷 文件上传</h3>
-                    <div class="upload-row">
-                        <div class="upload-btn" id="resumeUpload">
-                            <div class="icon">💼</div>
-                            <div class="info">
-                                <div class="text">上传简历</div>
-                                <div class="filename" id="resumeFilename"></div>
-                            </div>
-                            <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('resume', this)">
+        <!-- 输入区域 -->
+        <div class="input-container">
+            <div class="upload-section">
+                <div class="upload-row">
+                    <div class="upload-btn" id="resumeUpload">
+                        <div class="icon">💼</div>
+                        <div class="info">
+                            <div class="text">上传简历</div>
+                            <div class="filename" id="resumeFilename"></div>
                         </div>
-                        <div class="upload-btn" id="jdUpload">
-                            <div class="icon">📄</div>
-                            <div class="info">
-                                <div class="text">上传岗位 JD</div>
-                                <div class="filename" id="jdFilename"></div>
-                            </div>
-                            <input type="file" id="jdFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('jd', this)">
+                        <input type="file" id="resumeFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('resume', this)">
+                    </div>
+                    <div class="upload-btn" id="jdUpload">
+                        <div class="icon">📄</div>
+                        <div class="info">
+                            <div class="text">上传岗位 JD</div>
+                            <div class="filename" id="jdFilename"></div>
                         </div>
+                        <input type="file" id="jdFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" onchange="handleFileUpload('jd', this)">
                     </div>
+                    <div class="encouragement" id="encouragementText">💪 每一次投递都是向梦想靠近一步</div>
                 </div>
+            </div>
 
-                <div class="input-row">
-                    <div class="input-area">
-                        <textarea id="messageInput" placeholder="输入您的问题或直接粘贴简历和JD文字内容进行分析..." oninput="autoResize(this)"></textarea>
-                    </div>
-                    <div class="control-btns">
-                        <button class="control-btn play-btn" id="playBtn" onclick="sendMessage()" title="发送">
-                            ▶
-                        </button>
-                        <button class="control-btn stop-btn" id="stopBtn" onclick="stopGeneration()" title="停止">
-                            ■
-                        </button>
-                    </div>
+            <div class="input-row">
+                <div class="input-area">
+                    <textarea id="messageInput" placeholder="输入您的问题或直接粘贴简历和JD文字内容进行分析..." oninput="autoResize(this)"></textarea>
                 </div>
+                <div class="control-btns">
+                    <button class="control-btn play-btn" id="playBtn" onclick="sendMessage()" title="发送">
+                        ▶
+                    </button>
+                </div>
+            </div>
 
-                <div class="status-bar">
-                    <div class="status-indicator" id="statusIndicator"></div>
-                    <span id="statusText">就绪</span>
-                    <div class="loading-dots" id="loadingDots" style="display: none;">
-                        <span></span><span></span><span></span>
+            <div class="status-bar">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="statusText">就绪</span>
+                <div class="loading-dots" id="loadingDots" style="display: none;">
+                    <span></span><span></span><span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 报告弹窗 -->
+    <div class="modal-overlay" id="reportModal" onclick="closeReportModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>📊 岗位匹配报告</h3>
+                <button class="modal-close" onclick="closeReportModal()">×</button>
+            </div>
+            <div class="modal-content" id="modalContent">
+                <div class="report-list" id="reportList">
+                    <div class="empty-state">
+                        <div class="icon">📋</div>
+                        <p>暂无报告，请先进行匹配分析</p>
                     </div>
                 </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="modal-btn confirm" id="viewReportBtn" onclick="viewReportInNewPage()" disabled>查看报告</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 重置确认弹窗 -->
+    <div class="modal-overlay" id="resetModal" onclick="closeResetModal()">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>⚠️ 确认重置</h3>
+                <button class="modal-close" onclick="closeResetModal()">×</button>
+            </div>
+            <div class="modal-content">
+                <div style="text-align: center; padding: 20px 0;">
+                    <div style="font-size: 3rem; margin-bottom: 15px;">🔄</div>
+                    <p style="color: #666; font-size: 0.95rem;">点击该按钮将清空和 Agent 的交流记录，您可以重新上传简历和 JD 开始新的匹配分析。</p>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: center;">
+                <button class="modal-btn confirm" onclick="resetChat()" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">确认重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自定义确认对话框 -->
+    <div class="modal-overlay" id="confirmModal" onclick="closeConfirmModal()">
+        <div class="modal" onclick="event.stopPropagation()" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3 id="confirmTitle">⚠️ 确认操作</h3>
+                <button class="modal-close" onclick="closeConfirmModal()">×</button>
+            </div>
+            <div class="modal-content">
+                <div style="text-align: center; padding: 20px 0;">
+                    <div id="confirmIcon" style="font-size: 3rem; margin-bottom: 15px;">⚠️</div>
+                    <p id="confirmMessage" style="color: #666; font-size: 0.95rem; line-height: 1.6;"></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeConfirmModal()">取消</button>
+                <button class="modal-btn confirm" id="confirmActionBtn" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">确认</button>
             </div>
         </div>
     </div>
@@ -752,7 +997,6 @@
         let resumePath = '';
         let jdPath = '';
         let isProcessing = false;
-        let currentController = null;
 
         function showToast(message, type = 'info') {
             const toastContainer = document.getElementById('toastContainer');
@@ -768,18 +1012,6 @@
                 toast.classList.add('toast-out');
                 setTimeout(() => toast.remove(), 300);
             }, 3000);
-        }
-
-        function showLoading(text = '处理中...') {
-            const overlay = document.getElementById('loadingOverlay');
-            const loadingText = document.getElementById('loadingText');
-            loadingText.textContent = text;
-            overlay.classList.add('active');
-        }
-
-        function hideLoading() {
-            const overlay = document.getElementById('loadingOverlay');
-            overlay.classList.remove('active');
         }
 
         async function handleFileUpload(type, input) {
@@ -869,7 +1101,6 @@
             const statusText = document.getElementById('statusText');
             const loadingDots = document.getElementById('loadingDots');
             const playBtn = document.getElementById('playBtn');
-            const stopBtn = document.getElementById('stopBtn');
 
             indicator.className = 'status-indicator';
 
@@ -878,36 +1109,22 @@
                 statusText.textContent = text || '处理中';
                 loadingDots.style.display = 'inline-flex';
                 playBtn.disabled = true;
-                stopBtn.classList.add('active');
             } else if (status === 'error') {
                 indicator.classList.add('error');
                 statusText.textContent = text || '错误';
                 loadingDots.style.display = 'none';
                 playBtn.disabled = false;
-                stopBtn.classList.remove('active');
             } else {
                 statusText.textContent = text || '就绪';
                 loadingDots.style.display = 'none';
                 playBtn.disabled = false;
-                stopBtn.classList.remove('active');
             }
-        }
-
-        function stopGeneration() {
-            if (currentController) {
-                currentController.abort();
-                currentController = null;
-            }
-            isProcessing = false;
-            updateStatus('idle', '已停止');
-            showToast('已停止生成', 'info');
         }
 
         function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const message = messageInput.value.trim();
 
-            // 验证输入：至少需要上传图片，或输入文字内容
             const hasImageInput = resumeFile && jdFile;
             
             if (!message && !hasImageInput) {
@@ -928,32 +1145,14 @@
             processMessage(userMessage);
         }
 
-        function sanitizeContent(text) {
-            // 移除潜在危险的 HTML 标签
-            return text
-                .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')      // 移除 script 标签
-                .replace(/<iframe[^>]*>[\s\S]*?<\/iframe>/gi, '')    // 移除 iframe 标签
-                .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '')          // 移除 svg 标签
-                .replace(/<object[^>]*>[\s\S]*?<\/object>/gi, '')    // 移除 object 标签
-                .replace(/<embed[^>]*>[\s\S]*?<\/embed>/gi, '')      // 移除 embed 标签
-                .replace(/<applet[^>]*>[\s\S]*?<\/applet>/gi, '')    // 移除 applet 标签
-                .replace(/javascript:/gi, 'javascript:')             // 保持但标记
-                .replace(/on\w+\s*=\s*["']?[^"']*["']?/gi, '');      // 移除事件属性
-        }
-        
         function formatContent(text) {
             if (!text) return '';
-            
-            // 首先进行安全清理
-            let sanitized = sanitizeContent(text);
-            
-            // 然后进行 Markdown 转换
-            return sanitized
+            return text
                 .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.+?)\*/g, '<em>$1</em>')
                 .replace(/^- (.+)$/gm, '<li>$1</li>')
                 .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
-                .replace(/<\/ul>\s*<ul>/g, '')  // 合并相邻的 ul 标签
+                .replace(/<\/ul>\s*<ul>/g, '')
                 .replace(/\n/g, '<br>');
         }
 
@@ -962,16 +1161,16 @@
             updateStatus('processing', '正在思考...');
 
             let responseText = '';
-            let toolStatus = '';
             const messageEl = addMessage('agent', '正在思考，请稍候...');
 
             try {
-                // 构建请求体：消息 + 图片路径（如果有）
-                const requestBody = {
-                    message: message,
-                    resume_path: resumePath,
-                    jd_path: jdPath
-                };
+                const username = localStorage.getItem('username') || 'anonymous';
+            const requestBody = {
+                message: message,
+                resume_path: resumePath,
+                jd_path: jdPath,
+                username: username
+            };
                 
                 const response = await fetch('/api/v1/agent/chat', {
                     method: 'POST',
@@ -1003,13 +1202,14 @@
                             try {
                                 const data = JSON.parse(line.slice(6));
                                 if (data.type === 'agent') {
-                                    responseText = data.content; // 替换为完整内容
+                                    responseText = data.content;
                                     messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
                                 } else if (data.type === 'tool') {
-                                    // 显示工具调用的实际内容
-                                    messageEl.innerHTML = `${formatContent(data.content)}<div class="tool-status">[ 工具调用中... ]</div><div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                                    messageEl.innerHTML = `${formatContent(data.content)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
                                 } else if (data.type === 'done') {
                                     break;
+                                } else if (data.type === 'report_generated') {
+                                    showToast('报告已自动生成，可在生成报告按钮中查看', 'success');
                                 } else if (data.type === 'error') {
                                     responseText = `抱歉，发生了错误：${data.content}。请稍后重试。`;
                                     messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
@@ -1049,6 +1249,304 @@
         if (storedUsername) {
             document.getElementById('welcomeText').textContent = storedUsername;
         }
+
+        let selectedReport = null;
+        let currentReports = [];
+
+        // 打开报告弹窗
+        async function openReportModal() {
+            const modal = document.getElementById('reportModal');
+            modal.classList.add('show');
+            await loadReports();
+        }
+
+        // 关闭报告弹窗
+        function closeReportModal() {
+            const modal = document.getElementById('reportModal');
+            modal.classList.remove('show');
+            selectedReport = null;
+            document.getElementById('viewReportBtn').disabled = true;
+        }
+
+        // 显示重置确认弹窗
+        function showResetConfirm() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.add('show');
+        }
+
+        // 关闭重置确认弹窗
+        function closeResetModal() {
+            const modal = document.getElementById('resetModal');
+            modal.classList.remove('show');
+        }
+
+        // 自定义确认对话框相关函数
+        let confirmCallback = null;
+        
+        function showConfirmModal(title, message, icon = '⚠️', confirmText = '确认') {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMessage').textContent = message;
+            document.getElementById('confirmIcon').textContent = icon;
+            document.getElementById('confirmActionBtn').textContent = confirmText;
+            
+            const modal = document.getElementById('confirmModal');
+            modal.classList.add('show');
+        }
+        
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('show');
+            confirmCallback = null;
+        }
+        
+        function setConfirmCallback(callback) {
+            confirmCallback = callback;
+        }
+        
+        // 确认按钮点击处理
+        document.getElementById('confirmActionBtn').addEventListener('click', function() {
+            if (confirmCallback) {
+                const callback = confirmCallback;
+                closeConfirmModal();
+                callback();
+            }
+        });
+
+        // 重置对话
+        function resetChat() {
+            // 清空对话消息
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = `
+                <div class="message agent">
+                    <div class="avatar">J</div>
+                    <div class="content">
+                        您好！我是 JobFit Agent，您的智能求职助手。
+                        <br><br>
+                        请上传您的简历和目标岗位的 JD，我将帮您分析匹配度并提供个性化建议。
+                        <div class="time">现在</div>
+                    </div>
+                </div>
+            `;
+
+            // 清空上传的文件
+            resumeFile = null;
+            jdFile = null;
+            resumePath = '';
+            jdPath = '';
+
+            // 重置文件上传按钮状态
+            document.getElementById('resumeFilename').textContent = '';
+            document.getElementById('jdFilename').textContent = '';
+            document.getElementById('resumeUpload').classList.remove('active');
+            document.getElementById('jdUpload').classList.remove('active');
+
+            // 清空输入框
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // 关闭弹窗
+            closeResetModal();
+
+            // 显示提示
+            showToast('对话已重置，可以重新开始匹配分析', 'success');
+        }
+
+        // 加载报告列表
+        async function loadReports() {
+            const username = localStorage.getItem('username') || 'anonymous';
+            const reportList = document.getElementById('reportList');
+
+            try {
+                const response = await fetch(`/api/v1/report/list?username=${encodeURIComponent(username)}`);
+                const data = await response.json();
+
+                if (response.ok && data.reports && data.reports.length > 0) {
+                    currentReports = data.reports;
+                    reportList.innerHTML = '';
+
+                    data.reports.forEach((report, index) => {
+                        const reportItem = document.createElement('div');
+                        reportItem.className = 'report-item';
+                        reportItem.dataset.filename = report.filename;
+                        reportItem.dataset.timestamp = report.timestamp;
+                        reportItem.onclick = () => selectReport(report);
+
+                        const reportInfo = document.createElement('div');
+                        reportInfo.className = 'report-info';
+
+                        const reportName = document.createElement('div');
+                        reportName.className = 'report-name';
+                        reportName.textContent = `报告 ${index + 1}`;
+
+                        const reportTime = document.createElement('div');
+                        reportTime.className = 'report-time';
+                        reportTime.textContent = report.created_time;
+
+                        reportInfo.appendChild(reportName);
+                        reportInfo.appendChild(reportTime);
+
+                        // 删除按钮
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'report-delete-btn';
+                        deleteBtn.innerHTML = '🗑️';
+                        deleteBtn.title = '删除报告';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation(); // 阻止事件冒泡，避免触发选择报告
+                            deleteReport(report);
+                        };
+
+                        reportItem.appendChild(reportInfo);
+                        reportItem.appendChild(deleteBtn);
+                        reportList.appendChild(reportItem);
+                    });
+                } else {
+                    reportList.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📋</div>
+                            <p>暂无报告，请先进行匹配分析</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                reportList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">❌</div>
+                        <p>获取报告列表失败，请稍后重试</p>
+                    </div>
+                `;
+                console.error('Failed to load reports:', err);
+            }
+        }
+
+        // 选择报告
+        function selectReport(report) {
+            selectedReport = report;
+            
+            // 移除其他选中状态
+            document.querySelectorAll('.report-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            // 添加选中状态
+            const selectedItem = document.querySelector(`[data-filename="${report.filename}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+            }
+
+            // 启用查看按钮
+            document.getElementById('viewReportBtn').disabled = false;
+        }
+
+        // 查看报告（在新页面打开）
+        function viewReportInNewPage() {
+            if (!selectedReport) {
+                alert('请先选择一份报告');
+                return;
+            }
+            
+            const username = localStorage.getItem('username') || 'anonymous';
+            
+            const params = new URLSearchParams({
+                username: username,
+                filename: selectedReport.filename
+            });
+            const reportUrl = `report.html?${params.toString()}`;
+            
+            closeReportModal();
+            
+            setTimeout(() => {
+                const newWindow = window.open(reportUrl, '_blank');
+                
+                if (!newWindow) {
+                    alert('无法打开报告页面，请检查浏览器是否拦截了弹窗。\n\n解决方法是：在浏览器顶部地址栏点击"允许弹窗"。');
+                }
+            }, 300);
+        }
+
+        // 删除报告
+        function deleteReport(report) {
+            showConfirmModal(
+                '🗑️ 确认删除',
+                `确定要删除报告 "${report.filename}" 吗？\n\n此操作无法撤销，删除后将无法恢复。`,
+                '🗑️',
+                '确认删除'
+            );
+            
+            // 设置确认回调
+            setConfirmCallback(async function() {
+                try {
+                    showToast('正在删除...', 'info');
+                    
+                    const username = localStorage.getItem('username') || 'anonymous';
+                    const url = `/api/v1/report/delete?username=${encodeURIComponent(username)}&filename=${encodeURIComponent(report.filename)}`;
+                    
+                    const response = await fetch(url, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    let result;
+                    try {
+                        result = await response.json();
+                    } catch (e) {
+                        const text = await response.text();
+                        throw new Error(`服务器返回: ${text}`);
+                    }
+
+                    if (!response.ok) {
+                        throw new Error(result.message || `HTTP错误: ${response.status}`);
+                    }
+
+                    if (result.success) {
+                        showToast('报告删除成功', 'success');
+                        
+                        // 更新报告列表
+                        loadReports();
+                        
+                        // 如果删除的是当前选中的报告，重置选中状态
+                        if (selectedReport && selectedReport.filename === report.filename) {
+                            selectedReport = null;
+                            document.getElementById('viewReportBtn').disabled = true;
+                        }
+                    } else {
+                        throw new Error(result.message || '删除失败');
+                    }
+                } catch (error) {
+                    console.error('[deleteReport] 删除失败:', error);
+                    showToast(`删除失败: ${error.message}`, 'error');
+                }
+            });
+        }
+
+        // 格式化Markdown内容
+        function formatMarkdown(content) {
+            if (!content) return '';
+            return content
+                .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+                .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+                .replace(/^- (.+)$/gm, '<li>$1</li>')
+                .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+                .replace(/<\/ul>\s*<ul>/g, '')
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // 随机切换鼓励语
+        const encouragements = [
+            '🌱 种一棵树，最好的时间是十年前，其次是现在',
+            '🌟 星光不问赶路人，时光不负有心人',
+            '🎨 你的经历，都是未来的伏笔',
+            '🚀 人生没有白走的路，每一步都算数',
+            '💎 沉淀自己，静待花开',
+            '✨ 所有的等待，都是为了更好的遇见',
+            '� 心若有所向往，何惧道阻且长',
+            '🌻 慢慢来，比较快'
+        ];
+        const randomIndex = Math.floor(Math.random() * encouragements.length);
+        document.getElementById('encouragementText').textContent = encouragements[randomIndex];
     </script>
 </body>
 </html>

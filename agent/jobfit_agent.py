@@ -21,7 +21,6 @@ from agent.tools.match_tool import match_resume_to_jd
 from agent.tools.search_tool import search_internet
 from agent.tools.learning_tool import suggest_learning
 from agent.tools.reflection_tool import reflect_on_match
-from agent.tools.report_tool import generate_report
 
 load_dotenv()
 
@@ -46,8 +45,7 @@ def create_jobfit_agent():
         match_resume_to_jd,
         search_internet,
         suggest_learning,
-        reflect_on_match,
-        generate_report
+        reflect_on_match
     ]
 
     # 系统提示词 —— 引导 Agent 按正确流程工作
@@ -60,7 +58,6 @@ def create_jobfit_agent():
     3. `reflect_on_match(match_json_str)` - 反思匹配结果，判断是否需要搜索
     4. `search_internet(query)` - 搜索面经/学习资料
     5. `suggest_learning(missing_skills)` - 生成学习路径
-    6. `generate_report(match_json_str, additional_advice)` - 生成 Markdown 报告
 
     ## 强制工作流（当用户提供两张图片路径并要求匹配时）
     1. **必须**连续两次调用 `extract_text_from_image`，分别提取简历和 JD 的文字。
@@ -68,7 +65,6 @@ def create_jobfit_agent():
     3. **必须**调用 `reflect_on_match`，传入匹配结果 JSON。
        - 如果反思结果中包含"需要搜索"，则必须调用 `search_internet`（用缺失技能作为关键词）。
     4. **必须**将匹配分数、匹配/缺失技能、反思结论、搜索摘要（如有）组织成最终回复。
-    5. 如果用户要求"生成报告"，**必须**调用 `generate_report`。
 
     ## 其他规则
     - **替换/更新**：用户明确说"替换简历/JD"时，只使用最新提交的图片或文本，忽略之前的内容。
@@ -110,37 +106,23 @@ def stream_jobfit_agent(agent, user_input, config):
     Yields:
         响应数据块
     """
-    import time
-    print(f"[{time.strftime('%H:%M:%S')}] 开始stream...")
-    
     for chunk in agent.stream({"messages": [HumanMessage(content=user_input)]}, config):
-        print(f"[{time.strftime('%H:%M:%S')}] 收到chunk，keys: {chunk.keys() if hasattr(chunk, 'keys') else type(chunk)}")
-        
         if "agent" in chunk:
             for msg in chunk["agent"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
-                    print(f"[{time.strftime('%H:%M:%S')}] yield agent: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
                     
         elif "tools" in chunk:
             for msg in chunk["tools"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
-                    print(f"[{time.strftime('%H:%M:%S')}] yield tool: {str(msg.content)[:100]}...")
                     yield {"type": "tool", "content": msg.content}
                     
         elif "model" in chunk:
             for msg in chunk["model"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
-                    print(f"[{time.strftime('%H:%M:%S')}] yield model: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
                     
         elif "__end__" in chunk:
             for msg in chunk["__end__"].get("messages", []):
                 if hasattr(msg, "content") and msg.content:
-                    print(f"[{time.strftime('%H:%M:%S')}] yield end agent: {str(msg.content)[:100]}...")
                     yield {"type": "agent", "content": msg.content}
-                    
-        else:
-            print(f"[{time.strftime('%H:%M:%S')}] 未处理的chunk结构: {str(chunk)[:200]}")
-            
-    print(f"[{time.strftime('%H:%M:%S')}] stream结束")

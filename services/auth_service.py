@@ -10,7 +10,6 @@
 import csv
 import os
 from datetime import datetime
-from typing import Optional
 
 from config.settings import settings
 from utils.crypto_utils import hash_password, verify_password, generate_token
