@@ -91,7 +91,7 @@ MODEL_TEMPERATURE=0.0
 ### 3. 启动服务
 
 ```bash
-python app_v2.py
+python app_v5.py
 ```
 
 访问 `http://localhost:5000` 即可使用。
@@ -173,6 +173,13 @@ python app_v2.py
 ## 📝 更新日志
 
 ### v5.0 (2026-05-31)
+- 修复第一阶段 OCR 红框无输出问题（多线程 + SSE keepalive 机制）
+- 丰富 Agent 最终输出文本，完整展示技能匹配详情与学习建议
+- 重构报告生成系统，实现多维度可视化分层（表格 / 进度条 / 雷达图 / 时间线）
+- 优化报告页面渲染逻辑，增强 Markdown CSS 样式
+- 删除冗余代码（main.py、debug_tuple.py），版本号升级至 v5.0
+
+### v3.0 (2026-05-15)
 - 重构为蓝图架构，代码结构更清晰
 - 新增报告查看页面，支持 PDF 和 Markdown 下载
 - 新增报告删除功能
