@@ -6,6 +6,7 @@
 3. 返回结构化摘要
 """
 
+import time
 from langchain_core.tools import tool
 from langchain_tavily import TavilySearch
 from config.settings import settings
@@ -35,15 +36,19 @@ def search_internet(query: str) -> str:
     Returns:
         搜索结果的文本摘要。
     """
-    # 使用缓存的搜索工具
+    start = time.time()
+    
     tavily = _get_tavily_search()
     
     try:
         result = tavily.run(query)
+        
         if isinstance(result, dict):
             snippets = [item.get("snippet", "") for item in result.get("results", [])]
-            return "\n".join(snippets)
+            res = "\n".join(snippets)
         else:
-            return str(result)
+            res = str(result)
+        
+        return res
     except Exception as e:
         return f"搜索失败: {e}。请检查 TAVILY_API_KEY 是否配置正确。"

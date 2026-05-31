@@ -6,6 +6,7 @@
 3. 推荐学习资源和实践项目
 """
 
+import time
 import json
 from langchain_core.tools import tool
 from langchain.chat_models import init_chat_model
@@ -37,6 +38,8 @@ def suggest_learning(missing_skills: str) -> str:
     Returns:
         学习建议文本。
     """
+    start = time.time()
+    
     llm = _get_llm()
     
     # 解析输入
@@ -58,4 +61,5 @@ def suggest_learning(missing_skills: str) -> str:
         """
     
     response = llm.invoke(prompt)
+    
     return response.content

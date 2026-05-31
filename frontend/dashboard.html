@@ -137,6 +137,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 15px;
         }
 
         .chat-header h2 {
@@ -144,6 +145,7 @@
             font-weight: 600;
             color: #333;
             margin: 0;
+            flex: 1;
         }
 
         .chat-header .reset-btn {
@@ -158,6 +160,331 @@
             display: flex;
             align-items: center;
             gap: 6px;
+        }
+
+        /* 思考过程配置按钮 */
+        .chat-header .config-btn {
+            padding: 8px 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            color: #666;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .chat-header .config-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8f5ff;
+        }
+
+        .chat-header .config-btn.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* 思考过程展示样式 */
+        .thinking-container {
+            background: linear-gradient(135deg, #f8faff 0%, #e8f4ff 100%);
+            border: 1px solid #d0e8ff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .thinking-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .thinking-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            animation: spin 2s linear infinite;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .thinking-title {
+            flex: 1;
+        }
+
+        .thinking-title .stage-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .thinking-title .stage-progress {
+            font-size: 0.75rem;
+            color: #888;
+        }
+
+        .thinking-progress-bar {
+            height: 4px;
+            background: #e8e8e8;
+            border-radius: 2px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .thinking-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        .thinking-content {
+            background: #fafbff;
+            border-radius: 10px;
+            padding: 12px 14px;
+            border-left: 3px solid #667eea;
+        }
+
+        .thinking-content .main-text {
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .thinking-content .detail-text {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .thinking-content .detail-text::before {
+            content: '→';
+            color: #667eea;
+        }
+
+        .thinking-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 14px;
+            background: #667eea;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* AI推理过程展示 */
+        .reasoning-block {
+            background: linear-gradient(135deg, #fef9f9 0%, #fff5f5 100%);
+            border: 1px solid #ffd9d9;
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 12px rgba(255, 107, 107, 0.08);
+        }
+
+        .reasoning-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #ffd0d0;
+        }
+
+        .reasoning-icon {
+            font-size: 1rem;
+        }
+
+        .reasoning-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #d44;
+        }
+
+        .reasoning-content {
+            font-size: 0.88rem;
+            color: #555;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        .reasoning-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .reasoning-content::-webkit-scrollbar-thumb {
+            background: #ffb3b3;
+            border-radius: 2px;
+        }
+
+        /* 停止按钮样式 - 与开始按钮保持一致 */
+        .control-btn.stop-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .control-btn.stop-btn:hover {
+            background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 思考过程配置面板 */
+        .thinking-config-panel {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            padding: 15px 20px;
+            min-width: 280px;
+            z-index: 100;
+            display: none;
+            animation: panelIn 0.2s ease-out;
+        }
+
+        @keyframes panelIn {
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .thinking-config-panel.show {
+            display: block;
+        }
+
+        .config-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .config-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .config-item label {
+            font-size: 0.85rem;
+            color: #555;
+        }
+
+        .config-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 开关按钮 */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 24px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* 速度滑块 */
+        .speed-slider {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #ddd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .speed-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .speed-value {
+            font-size: 0.8rem;
+            color: #667eea;
+            font-weight: 500;
+            min-width: 40px;
+            text-align: right;
         }
 
         .chat-header .reset-btn:hover {
@@ -871,6 +1198,28 @@
                 <button class="reset-btn" onclick="showResetConfirm()">
                     🔄 重新匹配
                 </button>
+                <button class="config-btn" id="thinkingConfigBtn" onclick="toggleThinkingConfig()">
+                    🧠 思考过程
+                </button>
+            </div>
+            
+            <!-- 思考过程配置面板 -->
+            <div class="thinking-config-panel" id="thinkingConfigPanel">
+                <div class="config-title">⚙️ 思考过程设置</div>
+                <div class="config-item">
+                    <label for="showThinking">显示思考过程</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="showThinking" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="config-item">
+                    <label for="thinkingSpeed">展示速度</label>
+                    <span class="speed-value" id="speedValue">1.0x</span>
+                </div>
+                <div class="config-item" style="margin-top: -10px;">
+                    <input type="range" class="speed-slider" id="thinkingSpeed" min="0.5" max="2" step="0.25" value="1">
+                </div>
             </div>
             
             <div class="chat-messages" id="chatMessages">
@@ -1100,7 +1449,6 @@
             const indicator = document.getElementById('statusIndicator');
             const statusText = document.getElementById('statusText');
             const loadingDots = document.getElementById('loadingDots');
-            const playBtn = document.getElementById('playBtn');
 
             indicator.className = 'status-indicator';
 
@@ -1108,12 +1456,10 @@
                 indicator.classList.add('processing');
                 statusText.textContent = text || '处理中';
                 loadingDots.style.display = 'inline-flex';
-                playBtn.disabled = true;
             } else if (status === 'error') {
                 indicator.classList.add('error');
                 statusText.textContent = text || '错误';
                 loadingDots.style.display = 'none';
-                playBtn.disabled = false;
             } else {
                 statusText.textContent = text || '就绪';
                 loadingDots.style.display = 'none';
@@ -1156,34 +1502,218 @@
                 .replace(/\n/g, '<br>');
         }
 
+        // 思考过程配置
+        let showThinkingEnabled = true;
+        let thinkingContainer = null;
+
+        // 初始化思考过程配置
+        function initThinkingConfig() {
+            const showThinkingCheckbox = document.getElementById('showThinking');
+            const thinkingSpeedSlider = document.getElementById('thinkingSpeed');
+            const speedValue = document.getElementById('speedValue');
+
+            showThinkingCheckbox.addEventListener('change', function() {
+                showThinkingEnabled = this.checked;
+                const configBtn = document.getElementById('thinkingConfigBtn');
+                if (showThinkingEnabled) {
+                    configBtn.classList.add('active');
+                } else {
+                    configBtn.classList.remove('active');
+                }
+            });
+
+            thinkingSpeedSlider.addEventListener('input', function() {
+                const speed = parseFloat(this.value);
+                speedValue.textContent = speed + 'x';
+            });
+
+            document.addEventListener('click', function(e) {
+                const panel = document.getElementById('thinkingConfigPanel');
+                const btn = document.getElementById('thinkingConfigBtn');
+                if (!panel.contains(e.target) && e.target !== btn) {
+                    panel.classList.remove('show');
+                }
+            });
+        }
+
+        // 切换思考过程配置面板
+        function toggleThinkingConfig() {
+            const panel = document.getElementById('thinkingConfigPanel');
+            panel.classList.toggle('show');
+        }
+
+        // 计算进度百分比
+        let reasoningBlock = null;
+        let reasoningTypewriterTimeout = null;
+        let reasoningCharIndex = 0;
+        let reasoningFullText = '';
+
+        function startReasoningBlock() {
+            if (reasoningTypewriterTimeout) {
+                clearTimeout(reasoningTypewriterTimeout);
+                reasoningTypewriterTimeout = null;
+            }
+            if (reasoningBlock) {
+                reasoningBlock.remove();
+                reasoningBlock = null;
+            }
+            const chatMessages = document.getElementById('chatMessages');
+            reasoningBlock = document.createElement('div');
+            reasoningBlock.className = 'reasoning-block';
+            reasoningBlock.innerHTML = `
+                <div class="reasoning-header">
+                    <span class="reasoning-icon">💭</span>
+                    <span class="reasoning-title">思考中</span>
+                </div>
+                <div class="reasoning-content"></div>
+            `;
+            chatMessages.appendChild(reasoningBlock);
+            reasoningFullText = '';
+            reasoningCharIndex = 0;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return reasoningBlock;
+        }
+
+        function appendToReasoning(text) {
+            if (!reasoningBlock) {
+                startReasoningBlock();
+            }
+            reasoningFullText += text;
+        }
+
+        function typeNextChar() {
+            if (!reasoningFullText || !reasoningBlock) {
+                reasoningTypewriterTimeout = null;
+                return;
+            }
+
+            const contentEl = reasoningBlock.querySelector('.reasoning-content');
+            if (!contentEl) {
+                reasoningTypewriterTimeout = null;
+                return;
+            }
+
+            const index = reasoningCharIndex;
+
+            if (index < reasoningFullText.length) {
+                const batchSize = 8;
+                const endIndex = Math.min(index + batchSize, reasoningFullText.length);
+                contentEl.textContent = reasoningFullText.substring(0, endIndex);
+                reasoningCharIndex = endIndex;
+                contentEl.scrollTop = contentEl.scrollHeight;
+                reasoningTypewriterTimeout = setTimeout(typeNextChar, 2);
+            } else {
+                reasoningTypewriterTimeout = null;
+            }
+        }
+
+        function finishReasoningBlock() {
+            if (reasoningTypewriterTimeout) {
+                clearTimeout(reasoningTypewriterTimeout);
+                reasoningTypewriterTimeout = null;
+            }
+            if (reasoningFullText && reasoningBlock) {
+                const contentEl = reasoningBlock.querySelector('.reasoning-content');
+                if (contentEl) {
+                    contentEl.textContent = reasoningFullText;
+                }
+            }
+        }
+
+        function clearAllReasoningBlocks() {
+            if (reasoningTypewriterTimeout) {
+                clearTimeout(reasoningTypewriterTimeout);
+                reasoningTypewriterTimeout = null;
+            }
+            if (reasoningBlock) {
+                reasoningBlock.remove();
+                reasoningBlock = null;
+            }
+            reasoningFullText = '';
+            reasoningCharIndex = 0;
+        }
+
+        // 处理新的阶段消息
+        function handleThinkingStage(stageData, message) {
+            if (!showThinkingEnabled) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+
+            if (!thinkingContainer) {
+                thinkingContainer = document.createElement('div');
+                thinkingContainer.className = 'thinking-container';
+                chatMessages.appendChild(thinkingContainer);
+            }
+
+            const stageIcon = stageData.icon || '🧠';
+            const stageName = stageData.name || '处理中';
+            const stageProgress = message?.match(/阶段\s*(\d+)\/(\d+)/)?.[0] || '';
+            const progressMatch = message?.match(/阶段\s*(\d+)\/(\d+)/);
+            const progressPercent = progressMatch ? Math.round((parseInt(progressMatch[1]) / parseInt(progressMatch[2])) * 100) : 0;
+
+            thinkingContainer.innerHTML = `
+                <div class="thinking-header">
+                    <div class="thinking-icon">${stageIcon}</div>
+                    <div class="thinking-title">
+                        <div class="stage-name">${stageName}</div>
+                        <div class="stage-progress">${stageProgress}</div>
+                    </div>
+                </div>
+                <div class="thinking-progress-bar">
+                    <div class="thinking-progress-fill" style="width: ${progressPercent}%"></div>
+                </div>
+            `;
+        }
+
+        // 隐藏思考过程
+        function hideThinking() {
+            if (thinkingContainer) {
+                thinkingContainer.remove();
+                thinkingContainer = null;
+            }
+        }
+
+        let abortController = null;
+
         async function processMessage(message) {
+            if (abortController) {
+                abortController.abort();
+            }
+            abortController = new AbortController();
+
             isProcessing = true;
             updateStatus('processing', '正在思考...');
+            updatePlayButton(true);
 
+            clearAllReasoningBlocks();
             let responseText = '';
-            const messageEl = addMessage('agent', '正在思考，请稍候...');
+            const messageEl = addMessage('agent', '');
 
             try {
                 const username = localStorage.getItem('username') || 'anonymous';
-            const requestBody = {
-                message: message,
-                resume_path: resumePath,
-                jd_path: jdPath,
-                username: username
-            };
-                
+                const requestBody = {
+                    message: message,
+                    resume_path: resumePath,
+                    jd_path: jdPath,
+                    username: username
+                };
+
                 const response = await fetch('/api/v1/agent/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify(requestBody),
+                    signal: abortController.signal
                 });
 
                 if (!response.ok) {
                     const data = await response.json();
                     responseText = `抱歉，发生了错误：${data.error || '未知错误'}。请稍后重试。`;
                     messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                    hideThinking();
+                    clearAllReasoningBlocks();
                     isProcessing = false;
                     updateStatus('idle', '就绪');
+                    updatePlayButton(false);
                     return;
                 }
 
@@ -1201,16 +1731,41 @@
                         if (line.startsWith('data: ')) {
                             try {
                                 const data = JSON.parse(line.slice(6));
-                                if (data.type === 'agent') {
+
+                                if (data.type === 'reasoning_start') {
+                                    startReasoningBlock();
+                                }
+                                else if (data.type === 'reasoning_end') {
+                                    finishReasoningBlock();
+                                }
+                                else if (data.type === 'reasoning') {
+                                    if (data.content) {
+                                        appendToReasoning(data.content);
+                                        if (!reasoningTypewriterTimeout) {
+                                            typeNextChar();
+                                        }
+                                    }
+                                }
+                                else if (data.type === 'thinking_stage') {
+                                    handleThinkingStage(data.content, data.message);
+                                }
+                                else if (data.type === 'agent') {
+                                    hideThinking();
+                                    clearAllReasoningBlocks();
                                     responseText = data.content;
                                     messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
-                                } else if (data.type === 'tool') {
-                                    messageEl.innerHTML = `${formatContent(data.content)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
-                                } else if (data.type === 'done') {
+                                }
+                                else if (data.type === 'done') {
+                                    hideThinking();
+                                    clearAllReasoningBlocks();
                                     break;
-                                } else if (data.type === 'report_generated') {
+                                }
+                                else if (data.type === 'report_generated') {
                                     showToast('报告已自动生成，可在生成报告按钮中查看', 'success');
-                                } else if (data.type === 'error') {
+                                }
+                                else if (data.type === 'error') {
+                                    hideThinking();
+                                    clearAllReasoningBlocks();
                                     responseText = `抱歉，发生了错误：${data.content}。请稍后重试。`;
                                     messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
                                 }
@@ -1219,18 +1774,48 @@
                             }
                         }
                     }
-
-                    document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
                 }
             } catch (err) {
-                responseText = `网络错误，请检查服务器是否运行。请稍后重试。`;
-                messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                if (err.name === 'AbortError') {
+                    hideThinking();
+                    clearAllReasoningBlocks();
+                    responseText = '已取消当前匹配分析。';
+                    messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                } else {
+                    hideThinking();
+                    clearAllReasoningBlocks();
+                    responseText = `网络错误，请检查服务器是否运行。请稍后重试。`;
+                    messageEl.innerHTML = `${formatContent(responseText)}<div class="time">${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}</div>`;
+                }
             }
 
             isProcessing = false;
             updateStatus('idle', '就绪');
+            updatePlayButton(false);
             document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
         }
+
+        function updatePlayButton(isProcessing) {
+            const playBtn = document.getElementById('playBtn');
+            if (isProcessing) {
+                playBtn.innerHTML = '⏹';
+                playBtn.classList.add('stop-btn');
+                playBtn.onclick = cancelProcess;
+            } else {
+                playBtn.innerHTML = '▶';
+                playBtn.classList.remove('stop-btn');
+                playBtn.onclick = sendMessage;
+            }
+        }
+
+        function cancelProcess() {
+            if (abortController) {
+                abortController.abort();
+            }
+        }
+
+        // 页面加载完成后初始化思考过程配置
+        document.addEventListener('DOMContentLoaded', initThinkingConfig);
 
         document.getElementById('messageInput').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {

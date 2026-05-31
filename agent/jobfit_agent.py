@@ -1,19 +1,16 @@
 """
 JobFit Agent 核心模块 - 定义 Agent 工作流和工具调用
-特性：
-1. 使用 LangGraph 构建 Agent
-2. 支持工具调用和状态管理
-3. 与服务层解耦
-4. 支持流式响应
 """
 
-import sqlite3
-import os
+import re
+import json
+import threading
+import time
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain.messages import HumanMessage
-from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain.agents import create_agent
+from langgraph.checkpoint.memory import MemorySaver
 
 from config.settings import settings
 from agent.tools.ocr_tool import extract_text_from_image
@@ -25,13 +22,6 @@ from agent.tools.reflection_tool import reflect_on_match
 load_dotenv()
 
 def create_jobfit_agent():
-    """
-    创建 JobFit Agent 实例
-    
-    Returns:
-        Agent 实例
-    """
-    # 初始化多模态模型（用于决策和工具调用）
     model = init_chat_model(
         model=settings.MODEL_NAME,
         model_provider="openai",
@@ -39,7 +29,6 @@ def create_jobfit_agent():
         api_key=settings.API_KEY
     )
 
-    # 工具列表
     tools = [
         extract_text_from_image,
         match_resume_to_jd,
@@ -48,81 +37,162 @@ def create_jobfit_agent():
         reflect_on_match
     ]
 
-    # 系统提示词 —— 引导 Agent 按正确流程工作
-    system_prompt = """
-    你是一个求职教练 Agent，必须**严格按流程执行**，不能跳过任何工具调用。
+    system_prompt = """你是一个专业的求职教练，擅长分析简历与职位描述的匹配度。"""
 
-    ## 工具
-    1. `extract_text_from_image(image_path)` - 从图片提取文字
-    2. `match_resume_to_jd(resume_text, jd_text)` - 返回加权匹配分数、必需/加分技能的匹配与缺失、建议
-    3. `reflect_on_match(match_json_str)` - 反思匹配结果，判断是否需要搜索
-    4. `search_internet(query)` - 搜索面经/学习资料
-    5. `suggest_learning(missing_skills)` - 生成学习路径
-
-    ## 强制工作流（当用户提供两张图片路径并要求匹配时）
-    1. **必须**连续两次调用 `extract_text_from_image`，分别提取简历和 JD 的文字。
-    2. **必须**调用 `match_resume_to_jd`，传入上一步得到的文本。
-    3. **必须**调用 `reflect_on_match`，传入匹配结果 JSON。
-       - 如果反思结果中包含"需要搜索"，则必须调用 `search_internet`（用缺失技能作为关键词）。
-    4. **必须**将匹配分数、匹配/缺失技能、反思结论、搜索摘要（如有）组织成最终回复。
-
-    ## 其他规则
-    - **替换/更新**：用户明确说"替换简历/JD"时，只使用最新提交的图片或文本，忽略之前的内容。
-    - **主动追问**：在首次匹配回复后，可以主动询问一项额外信息（如项目经验、求职时限），但每次最多追问一次。
-    - **单张图片**：如果只提供一张图片，询问另一张。
-    - **禁止编造**：绝对不能在不调用工具的情况下回复"无法提取"或类似的错误提示。工具返回的错误应原样告知用户。
-
-    ## 示例用户输入
-    > 分析匹配度。简历路径：/a/resume.png，JD路径：/b/jd.png
-
-    你必须按上述流程逐步调用工具，最终输出分析结果。
-    """
-
-    # 检查点持久化
-    os.makedirs(settings.RESOURCES_DIR, exist_ok=True)
-    db_path = os.path.join(settings.RESOURCES_DIR, "jobfit_agent.db")
-    conn = sqlite3.connect(db_path, check_same_thread=False)
-    checkpointer = SqliteSaver(conn)
-    checkpointer.setup()
-
+    memory = MemorySaver()
+    
     agent = create_agent(
         model=model,
         tools=tools,
         system_prompt=system_prompt,
-        checkpointer=checkpointer
+        checkpointer=memory
     )
-    return agent
+    return agent, model
 
 
-def stream_jobfit_agent(agent, user_input, config):
-    """
-    流式调用 Agent
-    
-    Args:
-        agent: Agent 实例
-        user_input: 用户输入
-        config: 配置参数
-        
-    Yields:
-        响应数据块
-    """
-    for chunk in agent.stream({"messages": [HumanMessage(content=user_input)]}, config):
-        if "agent" in chunk:
-            for msg in chunk["agent"].get("messages", []):
-                if hasattr(msg, "content") and msg.content:
-                    yield {"type": "agent", "content": msg.content}
-                    
-        elif "tools" in chunk:
-            for msg in chunk["tools"].get("messages", []):
-                if hasattr(msg, "content") and msg.content:
-                    yield {"type": "tool", "content": msg.content}
-                    
-        elif "model" in chunk:
-            for msg in chunk["model"].get("messages", []):
-                if hasattr(msg, "content") and msg.content:
-                    yield {"type": "agent", "content": msg.content}
-                    
-        elif "__end__" in chunk:
-            for msg in chunk["__end__"].get("messages", []):
-                if hasattr(msg, "content") and msg.content:
-                    yield {"type": "agent", "content": msg.content}
+def stream_jobfit_agent(agent, model, resume_path, jd_path, user_input, config, has_image_input=True):
+    def run_tool(tool_func, args):
+        try:
+            return ('success', tool_func.invoke(args))
+        except Exception as e:
+            return ('error', str(e))
+
+    def stream_llm(prompt_text):
+        for chunk in model.stream([HumanMessage(content=prompt_text)]):
+            if hasattr(chunk, 'content') and chunk.content:
+                yield {'type': 'reasoning', 'content': chunk.content}
+
+    def yield_stage(stage_id, stage_name, icon, order, total):
+        yield {
+            'type': 'thinking_stage',
+            'content': {'id': stage_id, 'name': stage_name, 'icon': icon, 'order': order},
+            'message': f'阶段 {order}/{total}：{stage_name}'
+        }
+
+    try:
+        TOTAL_STAGES = 6 if has_image_input else 5
+        stage_num = 0
+
+        if has_image_input:
+            stage_num += 1
+            yield from yield_stage('ocr', '信息提取', '🔍', stage_num, TOTAL_STAGES)
+            yield {'type': 'reasoning_start'}
+            yield {'type': 'reasoning', 'content': '🔍 正在提取简历中的文字信息...\n🔍 正在提取JD中的文字信息...\n\n'}
+
+            from concurrent.futures import ThreadPoolExecutor
+            ocr_results = {'resume_result': None, 'jd_result': None,
+                           'resume_error': None, 'jd_error': None}
+            ocr_done = threading.Event()
+
+            def run_ocr():
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    future_resume = executor.submit(
+                        run_tool, extract_text_from_image, {'image_path': resume_path})
+                    future_jd = executor.submit(
+                        run_tool, extract_text_from_image, {'image_path': jd_path})
+                    status_r, result_r = future_resume.result()
+                    status_j, result_j = future_jd.result()
+                if status_r == 'error':
+                    ocr_results['resume_error'] = result_r
+                else:
+                    ocr_results['resume_result'] = result_r
+                if status_j == 'error':
+                    ocr_results['jd_error'] = result_j
+                else:
+                    ocr_results['jd_result'] = result_j
+                ocr_done.set()
+
+            threading.Thread(target=run_ocr, daemon=True).start()
+
+            while not ocr_done.is_set():
+                yield {'type': 'keepalive'}
+                time.sleep(0.5)
+
+            if ocr_results['resume_error']:
+                yield {'type': 'error', 'content': f'简历识别失败: {ocr_results["resume_error"]}'}
+                return
+            if ocr_results['jd_error']:
+                yield {'type': 'error', 'content': f'JD识别失败: {ocr_results["jd_error"]}'}
+                return
+
+            resume_result = ocr_results['resume_result']
+            jd_result = ocr_results['jd_result']
+
+            yield {'type': 'reasoning', 'content': '✅ 文字信息提取完成\n\n'}
+        else:
+            yield {'type': 'reasoning_start'}
+            resume_result = user_input
+            jd_result = user_input
+
+        stage_num += 1
+        yield from yield_stage('resume_analysis', '简历解析与概括', '📄', stage_num, TOTAL_STAGES)
+        if has_image_input:
+            yield {'type': 'reasoning', 'content': '\n\n---\n\n'}
+
+        resume_prompt = f"""根据以下简历提取关键信息，进行有详有略的概括总结。突出重点经历与核心技能，适度取舍细节，避免逐条罗列：
+
+{resume_result[:1500]}"""
+
+        yield from stream_llm(resume_prompt)
+
+        stage_num += 1
+        yield from yield_stage('jd_analysis', 'JD解析与概括', '📋', stage_num, TOTAL_STAGES)
+        yield {'type': 'reasoning', 'content': '\n\n---\n\n'}
+
+        jd_prompt = f"""根据以下职位描述，概括核心要求，有详有略：
+
+{jd_result[:1500]}"""
+
+        yield from stream_llm(jd_prompt)
+
+        stage_num += 1
+        yield from yield_stage('match', '匹配分析与反思', '🎯', stage_num, TOTAL_STAGES)
+        yield {'type': 'reasoning', 'content': '\n\n---\n\n正在进行技能匹配分析...\n\n'}
+
+        status, match_result_val = run_tool(match_resume_to_jd, {
+            'resume_text': resume_result,
+            'jd_text': jd_result
+        })
+        if status == 'error':
+            yield {'type': 'error', 'content': f'匹配分析失败: {match_result_val}'}
+            return
+
+        match_result_str = str(match_result_val)
+
+        match_prompt = f"""基于以下数据，先分析匹配度（得分、匹配/缺失的技能），再评估匹配结果的合理性。有详有略，基于数据：
+
+- 匹配结果：{match_result_str[:800]}"""
+
+        yield from stream_llm(match_prompt)
+
+        stage_num += 1
+        yield from yield_stage('learning', '提升建议', '📚', stage_num, TOTAL_STAGES)
+        yield {'type': 'reasoning', 'content': '\n\n---\n\n'}
+
+        match_data = None
+        try:
+            json_match = re.search(r'\{[\s\S]*\}', match_result_str)
+            if json_match:
+                match_data = json.loads(json_match.group())
+        except:
+            pass
+
+        missing_skills = match_data.get('required_skills_missing', []) if match_data else []
+        recommendations = match_data.get('recommendations', []) if match_data else []
+
+        learning_prompt = f"""基于匹配结果为求职者提供提升建议，包括学习方向和行动计划。有详有略：
+
+- 缺失技能：{missing_skills if missing_skills else '无'}
+- 已有建议：{recommendations if recommendations else '无'}"""
+
+        yield from stream_llm(learning_prompt)
+
+        stage_num += 1
+        yield from yield_stage('summary', '生成报告', '📊', stage_num, TOTAL_STAGES)
+        yield {'type': 'reasoning_end'}
+        yield {'type': 'final_result', 'content': match_result_str}
+
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        yield {'type': 'error', 'content': str(e)}

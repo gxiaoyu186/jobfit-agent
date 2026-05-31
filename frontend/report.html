@@ -142,7 +142,9 @@
         .markdown-content h2 {
             font-size: 1.2rem;
             color: #333;
-            margin: 25px 0 15px;
+            margin: 30px 0 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -156,17 +158,23 @@
             border-radius: 2px;
         }
 
+        .markdown-content h3 {
+            font-size: 1.05rem;
+            color: #444;
+            margin: 22px 0 12px;
+        }
+
         .markdown-content p {
             margin-bottom: 15px;
         }
 
-        .markdown-content ul {
+        .markdown-content ul, .markdown-content ol {
             margin: 15px 0;
             padding-left: 30px;
         }
 
         .markdown-content li {
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             position: relative;
         }
 
@@ -175,12 +183,99 @@
         }
 
         .markdown-content strong {
-            color: #667eea;
+            color: #4a5bd4;
             font-weight: 600;
         }
 
         .markdown-content em {
             color: #888;
+        }
+
+        .markdown-content hr {
+            border: none;
+            border-top: 1px solid #e8e8e8;
+            margin: 25px 0;
+        }
+
+        /* Markdown 表格样式 */
+        .markdown-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .markdown-content thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .markdown-content thead th {
+            color: white;
+            font-weight: 600;
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        .markdown-content tbody td {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            background: white;
+        }
+
+        .markdown-content tbody tr:nth-child(even) td {
+            background: #fafbff;
+        }
+
+        .markdown-content tbody tr:hover td {
+            background: #f0f2ff;
+        }
+
+        /* Markdown 代码块 / ASCII 图表 */
+        .markdown-content pre {
+            background: #1e1e2e;
+            color: #cdd6f4;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin: 18px 0;
+            overflow-x: auto;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            border: 1px solid #313244;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .markdown-content pre code {
+            background: none;
+            padding: 0;
+            color: inherit;
+        }
+
+        .markdown-content code {
+            background: #f0f0f5;
+            color: #e74c3c;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+        }
+
+        /* Markdown 引用块 */
+        .markdown-content blockquote {
+            border-left: 4px solid #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            padding: 14px 20px;
+            margin: 18px 0;
+            border-radius: 0 8px 8px 0;
+            color: #555;
+            font-style: italic;
+        }
+
+        .markdown-content blockquote p {
+            margin-bottom: 5px;
         }
 
         /* 匹配分数卡片 */
@@ -405,6 +500,7 @@
 
     <script>
         let reportData = null;
+        let reportRawContent = '';
 
         function showToast(message, type = 'success') {
             const container = document.getElementById('toastContainer');
@@ -465,40 +561,13 @@
         }
 
         function downloadMD() {
-            if (!reportData) {
+            if (!reportRawContent) {
                 showToast('报告数据未加载', 'error');
                 return;
             }
 
             try {
-                // 生成MD格式内容
-                let mdContent = `# JobFit 职业匹配分析报告\n\n`;
-                mdContent += `生成时间：${new Date().toLocaleString('zh-CN')}\n\n`;
-                mdContent += `## 综合匹配分数：${reportData.match_score || 'N/A'} / 100\n\n`;
-                
-                // 必需技能
-                mdContent += `## 必需技能匹配情况\n`;
-                mdContent += `- ✅ 已匹配：${(reportData.required_skills_match || []).join(', ') || '无'}\n`;
-                mdContent += `- ❌ 缺失：${(reportData.required_skills_missing || []).join(', ') || '无'}\n\n`;
-                
-                // 加分技能
-                mdContent += `## 加分技能情况\n`;
-                mdContent += `- ✅ 已匹配：${(reportData.preferred_skills_match || []).join(', ') || '无'}\n`;
-                mdContent += `- ❌ 缺失：${(reportData.preferred_skills_missing || []).join(', ') || '无'}\n\n`;
-                
-                // 学习建议
-                mdContent += `## 学习建议\n`;
-                const recommendations = reportData.recommendations || [];
-                if (recommendations.length > 0) {
-                    recommendations.forEach((rec, index) => {
-                        mdContent += `${index + 1}. ${rec}\n`;
-                    });
-                } else {
-                    mdContent += `暂无学习建议\n`;
-                }
-
-                // 下载文件
-                const blob = new Blob([mdContent], { type: 'text/markdown' });
+                const blob = new Blob([reportRawContent], { type: 'text/markdown; charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -544,6 +613,8 @@
                 }
 
                 const data = await response.json();
+                
+                reportRawContent = data.content || '';
                 
                 try {
                     const jsonMatch = data.content.match(/\{[\s\S]*\}/);
@@ -637,59 +708,6 @@
             let matchResult = parseReportFromMarkdown(content);
             reportData = matchResult;
 
-            const scoreCard = matchResult.match_score ? `
-                <div class="score-card">
-                    <div class="score-value">${matchResult.match_score}</div>
-                    <div class="score-label">综合匹配分数</div>
-                    <div class="score-out-of">/ 100</div>
-                </div>
-            ` : '';
-
-            // 生成技能匹配区域
-            const requiredMatch = matchResult.required_skills_match || [];
-            const requiredMissing = matchResult.required_skills_missing || [];
-            const preferredMatch = matchResult.preferred_skills_match || [];
-            const preferredMissing = matchResult.preferred_skills_missing || [];
-
-            const skillsSection = `
-                <div class="skills-section">
-                    <div class="skill-box matched">
-                        <h3>✅ 必需技能 - 已匹配</h3>
-                        <div class="skill-list">
-                            ${requiredMatch.length > 0 ? requiredMatch.map(s => `<span class="skill-tag matched">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
-                        </div>
-                    </div>
-                    <div class="skill-box missing">
-                        <h3>❌ 必需技能 - 缺失</h3>
-                        <div class="skill-list">
-                            ${requiredMissing.length > 0 ? requiredMissing.map(s => `<span class="skill-tag missing">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
-                        </div>
-                    </div>
-                    <div class="skill-box matched">
-                        <h3>✨ 加分技能 - 已匹配</h3>
-                        <div class="skill-list">
-                            ${preferredMatch.length > 0 ? preferredMatch.map(s => `<span class="skill-tag matched">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
-                        </div>
-                    </div>
-                    <div class="skill-box missing">
-                        <h3>💡 加分技能 - 缺失</h3>
-                        <div class="skill-list">
-                            ${preferredMissing.length > 0 ? preferredMissing.map(s => `<span class="skill-tag missing">${s}</span>`).join('') : '<span style="color: #999; font-size: 0.85rem;">无</span>'}
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // 生成学习建议
-            const recommendations = matchResult.recommendations || [];
-            const recommendationsSection = recommendations.length > 0 ? `
-                <h2>学习建议</h2>
-                <ul>
-                    ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
-                </ul>
-            ` : '';
-
-            // 获取生成时间
             const timestampMatch = content.match(/生成时间：(.+)/);
             const generatedTime = timestampMatch ? timestampMatch[1] : new Date().toLocaleString('zh-CN');
 
@@ -700,9 +718,6 @@
                         <div class="report-meta">生成时间：${generatedTime} | 报告文件：${filename}</div>
                     </div>
                     <div class="report-body">
-                        ${scoreCard}
-                        ${skillsSection}
-                        ${recommendationsSection}
                         <div class="markdown-content">
                             ${(window.marked || marked).parse(content)}
                         </div>

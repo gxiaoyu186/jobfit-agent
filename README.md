@@ -1,4 +1,4 @@
-# JobFit Agent v3.0
+# JobFit Agent v5.0
 
 智能求职匹配助手，基于大语言模型帮助用户分析简历与岗位的匹配度，并提供针对性的学习建议。
 
@@ -27,8 +27,7 @@
 
 ```
 JobFit_Agent/
-├── app_v2.py                 # Flask 后端服务入口 (v3.0)
-├── main.py                   # 命令行交互入口
+├── app_v5.py                 # Flask 后端服务入口 (v5.0)
 ├── agent/                    # Agent 核心模块
 │   ├── jobfit_agent.py       # Agent 工作流定义
 │   ├── __init__.py
@@ -173,7 +172,7 @@ python app_v2.py
 
 ## 📝 更新日志
 
-### v3.0 (2026-05-15)
+### v5.0 (2026-05-31)
 - 重构为蓝图架构，代码结构更清晰
 - 新增报告查看页面，支持 PDF 和 Markdown 下载
 - 新增报告删除功能

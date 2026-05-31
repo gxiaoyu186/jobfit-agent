@@ -1,13 +1,10 @@
 """
 OCR 工具 - 从图片中提取文字
-特性：
-1. 支持本地图片和网络图片
-2. 使用多模态模型进行文字识别
-3. 模型实例缓存，避免重复初始化
 """
 
 import os
 import base64
+import time
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 from config.settings import settings
@@ -23,7 +20,8 @@ def _get_vision_model():
             model=settings.MODEL_NAME,
             base_url=settings.BASE_URL,
             api_key=settings.API_KEY,
-            temperature=settings.MODEL_TEMPERATURE
+            temperature=settings.MODEL_TEMPERATURE,
+            timeout=180  # 增加到3分钟
         )
     return _vision_model
 
@@ -38,10 +36,8 @@ def extract_text_from_image(image_path: str) -> str:
     Returns:
         图片中的文字内容（纯文本）。
     """
-    # 使用缓存的多模态模型
-    vision_model = _get_vision_model()
+    llm = _get_vision_model()
     
-    # 处理图片输入
     if image_path.startswith(("http://", "https://")):
         image_url = image_path
     else:
@@ -50,7 +46,6 @@ def extract_text_from_image(image_path: str) -> str:
             mime = "image/png" if image_path.lower().endswith(".png") else "image/jpeg"
             image_url = f"data:{mime};base64,{data}"
 
-    # 标准 OpenAI 多模态消息格式
     messages = [
         {
             "role": "user",
@@ -61,5 +56,19 @@ def extract_text_from_image(image_path: str) -> str:
         }
     ]
     
-    response = vision_model.invoke(messages)
-    return response.content
+    # 只重试1次，避免重复调用浪费金钱
+    max_retries = 1
+    
+    for attempt in range(max_retries):
+        try:
+            response = llm.invoke(messages)
+            return response.content
+        except Exception as e:
+            error_msg = str(e)
+            if attempt < max_retries - 1:
+                time.sleep(1)
+                continue
+            else:
+                raise Exception(f"OCR 提取失败: {error_msg}")
+    
+    return ""

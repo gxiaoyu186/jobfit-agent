@@ -21,7 +21,7 @@ class Settings:
     BASE_URL: str = os.getenv("BASE_URL", "")
     TAVILY_API_KEY: str = os.getenv("TAVILY_API_KEY", "")
     
-    # 模型配置
+    # 模型配置（OCR功能需要支持多模态的模型）
     MODEL_NAME: str = os.getenv("MODEL_NAME", "qwen3.5-plus")
     MODEL_TEMPERATURE: float = float(os.getenv("MODEL_TEMPERATURE", "0.0"))
     

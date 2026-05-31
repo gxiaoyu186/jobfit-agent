@@ -7,6 +7,7 @@ JobFit 控制器 - 处理匹配分析相关的 HTTP 请求
 """
 
 import json
+import sys
 from flask import Blueprint, request, jsonify, Response
 from services.jobfit_service import JobFitService
 from config.settings import settings
@@ -43,7 +44,6 @@ def agent_chat():
     
     响应：Server-Sent Events (SSE)
     """
-    print("[Controller] 收到 /agent/chat 请求")
     try:
         data = request.get_json()
         message = data.get('message', '').strip()
@@ -53,6 +53,7 @@ def agent_chat():
         
         def generate():
             try:
+                yield ":ok\n\n"
                 for chunk in jobfit_service.analyze_match(
                     resume_path=resume_path,
                     jd_path=jd_path,
@@ -64,16 +65,21 @@ def agent_chat():
             except JobFitException as e:
                 yield f"data: {json.dumps({'type': 'error', 'content': e.message}, ensure_ascii=False)}\n\n"
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 yield f"data: {json.dumps({'type': 'error', 'content': str(e)}, ensure_ascii=False)}\n\n"
         
-        return Response(
+        response = Response(
             generate(),
             mimetype='text/event-stream',
             headers={
                 'Cache-Control': 'no-cache',
-                'X-Accel-Buffering': 'no'
+                'X-Accel-Buffering': 'no',
+                'Connection': 'keep-alive'
             }
         )
+        response.headers['Content-Type'] = 'text/event-stream; charset=utf-8'
+        return response
     
     except JobFitException as e:
         return jsonify({'error': e.message}), e.status_code
